@@ -13,7 +13,7 @@ def fun_to_teste():
     iso, iso2 = file.parse_ipm(raw=raw)
 
 
-time_exec = 1
+time_exec = 6
 result = timeit.timeit(fun_to_teste, number=time_exec)
 
 
