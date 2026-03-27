@@ -59,7 +59,7 @@ class MastercardISO8583Parse(OutgoingFileManager):
         parser_mti_secondary: List[Dict[str, Any]] = []
         extract_iso = self._extract_iso_payload
         append_mti_main = parser_mti_main.append
-        # append_mti_secondary = parser_mti_secondary.append
+        append_mti_secondary = parser_mti_secondary.append
 
         while index < LEN_RAW:
             try:
@@ -71,12 +71,12 @@ class MastercardISO8583Parse(OutgoingFileManager):
                 )
 
                 if message_parser["MTI"] == self._MTI:
-                    # de055_current: bytes = message_parser["DE055"]
-                    # de055_base64: bytes = base64.b64decode(de055_current)
-                    # message_parser["DE055"] = de055_base64.hex().upper()
+                    de055_current: bytes = message_parser["DE055"]
+                    de055_base64: bytes = base64.b64decode(de055_current)
+                    message_parser["DE055"] = de055_base64.hex().upper()
                     append_mti_main(message_parser)
-                # else:
-                #     append_mti_secondary(message_parser)
+                else:
+                    append_mti_secondary(message_parser)
 
                 msg_count += 1
 
