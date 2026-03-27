@@ -10,7 +10,7 @@ def fun_to_teste():
     teste, _ = file.parse_ipm(date_file="26/05/2025", cycle="CIC2")
 
 
-time_exec = 10
+time_exec = 100
 result = timeit.timeit(fun_to_teste, number=time_exec)
 
 
