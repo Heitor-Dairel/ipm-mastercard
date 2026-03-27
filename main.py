@@ -7,7 +7,7 @@ file = MastercardISO8583Parse()
 
 def fun_to_teste():
 
-    teste, _ = file.parse_ipm(date_file="26/05/2025", cycle="CIC2")  # teste
+    teste, _ = file.parse_ipm(date_file="26/05/2025", cycle="CIC2")
 
 
 time_exec = 10
