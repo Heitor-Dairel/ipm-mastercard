@@ -1,0 +1,13 @@
+[project]
+name = "ipm-mastercard"
+version = "0.1.0"
+description = "Parser do Outgoing ISO8583-1993"
+authors = [
+    { name = "Heitor Dairel Gonzaga Tavares", email = "heitor.tavares@cscresult.com.br" },
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "rich>=14.3.3",
+    "starkbank-iso8583>=0.6.1",
+]
