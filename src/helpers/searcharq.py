@@ -1,8 +1,7 @@
-from typing import Final, Dict, List, Literal, Union, NamedTuple
+from typing import Final, Dict, List, Literal, NamedTuple
 from pathlib import Path
 from datetime import datetime
 from rich import print
-import sys
 
 
 class TupleManagerFile(NamedTuple):
