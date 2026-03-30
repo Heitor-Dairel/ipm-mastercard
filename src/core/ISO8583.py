@@ -1,20 +1,21 @@
 from typing import List, Final, Tuple, Dict, Any, Literal
-from ..helpers import OutgoingFileManager
+from ..helpers import get_model_path_file
 from ..template import mastercard
 from starkbank import iso8583
-from pathlib import Path
 
 
 class ISO8583ParseError(Exception):
     pass
 
 
-class MastercardISO8583Parse(OutgoingFileManager):
+class MastercardISO8583Parse:
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, path_search_model: bool = True) -> None:
 
         self._MTI: Final[str] = "1240"
+        self._path_search_model = get_model_path_file(
+            path_search_model=path_search_model
+        )
 
     def _extract_iso_payload(
         self, raw: memoryview, index: int, len_raw: int
@@ -71,8 +72,10 @@ class MastercardISO8583Parse(OutgoingFileManager):
 
                 if message_parser["MTI"] == self._MTI:
                     append_mti_main(message_parser)
-                else:
+
+                if message_parser["MTI"] != self._MTI:
                     append_mti_secondary(message_parser)
+
                 msg_count += 1
 
         except Exception as e:
@@ -85,15 +88,11 @@ class MastercardISO8583Parse(OutgoingFileManager):
         self, date_file: str, cycle: Literal["CIC1", "CIC2", "CIC3"]
     ) -> memoryview:
 
-        path_file, _, _ = self.get_outgoing_files_for_cycle(
+        _, _, bytes_file = self._path_search_model.get_files_for_cycle(
             date_file=date_file, cycle=cycle
         )
 
-        data: bytes = Path(path_file).read_bytes()
-
-        raw: memoryview = memoryview(data)
-
-        return raw
+        return bytes_file
 
     def parse_ipm(
         self, raw: memoryview
