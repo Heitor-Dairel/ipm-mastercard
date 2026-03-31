@@ -1,5 +1,6 @@
 from typing import Union
 from .searcharq import FileManagerProcessadora, FileManagerData, TupleManagerFile
+from .filedata import FilesDataSaving
 
 
 def get_model_path_file(
@@ -13,4 +14,4 @@ def get_model_path_file(
     return FileManagerData()
 
 
-__all__ = ["get_model_path_file", "TupleManagerFile"]
+__all__ = ["get_model_path_file", "TupleManagerFile", "FilesDataSaving"]

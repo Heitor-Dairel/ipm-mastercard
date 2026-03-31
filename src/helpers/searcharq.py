@@ -1,7 +1,6 @@
-from typing import Final, Dict, List, Literal, NamedTuple, Iterator, TypeAlias
+from typing import Final, Dict, List, Literal, NamedTuple, Iterator, TypeAlias, Tuple
 from pathlib import Path
 from datetime import datetime
-from rich import print
 
 
 FORMAT_DATE_TIME: Final[str] = "%d/%m/%Y %H:%M:%S"
@@ -41,6 +40,23 @@ class FileManagerProcessadora:
 
         self._OUTGOING_FILES: Final[FileLoadProcessadora] = self._load_outgoing_files()
 
+    def _format_outgoing_files(self, path_file: Path) -> Tuple[str, ...]:
+
+        file_name = path_file.name
+        parts_nam_file: List[str] = path_file.stem.split("_")
+        clico_outgoing_master: str = parts_nam_file[-3]
+
+        dt_time_file: str = parts_nam_file[-2] + parts_nam_file[-1]
+
+        f_dt_time_str: str = datetime.strptime(dt_time_file, "%d%m%Y%H%M%S").strftime(
+            FORMAT_DATE_TIME
+        )
+        f_dt_str: str = datetime.strptime(dt_time_file, "%d%m%Y%H%M%S").strftime(
+            FORMAT_DATE
+        )
+
+        return file_name, clico_outgoing_master, f_dt_str, f_dt_time_str
+
     def _load_outgoing_files(self) -> FileLoadProcessadora:
 
         BASE_DIR: Final[Path] = Path(
@@ -58,25 +74,16 @@ class FileManagerProcessadora:
 
             if FLAG_FOLDER not in arq.parent.name:
 
-                parts_nam_file: List[str] = arq.stem.split("_")
-
-                clico_outgoing_master: str = parts_nam_file[-3]
-                dt_file: str = parts_nam_file[-2]
-                time_file: str = parts_nam_file[-1]
-
-                f_dt_time_str: str = datetime.strptime(
-                    f"{dt_file} {time_file}", "%d%m%Y %H%M%S"
-                ).strftime(FORMAT_DATE_TIME)
-                f_dt_str: str = datetime.strptime(dt_file, "%d%m%Y").strftime(
-                    FORMAT_DATE
+                file_name, clico_outgoing_master, f_dt_str, f_dt_time_str = (
+                    self._format_outgoing_files(path_file=arq)
                 )
 
                 if f_dt_str not in dict_outgoing_arq:
                     dict_outgoing_arq[f_dt_str] = {}
 
-                raw: memoryview = get_bytes_to_file(arq.resolve())
+                raw: memoryview = get_bytes_to_file(arq)
                 dict_outgoing_arq[f_dt_str][clico_outgoing_master] = TupleManagerFile(
-                    file_name=arq.name,
+                    file_name=file_name,
                     file_dt_time=f_dt_time_str,
                     bytes_file=raw,
                 )
@@ -124,29 +131,37 @@ class FileManagerData:
 
         self._OUTGOING_FILES: Final[FileLoadData] = self._load_outgoing_files()
 
+    def _format_outgoing_files(self, path_file: Path) -> Tuple[str, ...]:
+
+        file_name = path_file.name
+        parts_nam_file: List[str] = path_file.stem.split("_")
+        clico_outgoing_master: str = parts_nam_file[-3]
+        dt_file: str = parts_nam_file[-2]
+        file_time: str = parts_nam_file[-1]
+        f_dt_time_str: str = datetime.strptime(
+            f"{dt_file} {file_time}", "%d%m%Y %H%M%S"
+        ).strftime(FORMAT_DATE_TIME)
+        f_dt_str: str = datetime.strptime(dt_file, "%d%m%Y").strftime(FORMAT_DATE)
+
+        return file_name, clico_outgoing_master, f_dt_str, f_dt_time_str
+
     def _load_outgoing_files(self) -> FileLoadData:
 
         BASE_DIR: Final[Path] = Path(__file__).parent.parent.parent
-        DATA_DIR = BASE_DIR / "data"
+        DATA_DIR: Final[Path] = BASE_DIR / "data"
         arquivos = DATA_DIR.glob("CSU_ACQ_MASTER_OUTGOING_*.TXT")
         dict_outgoing_arq: FileLoadData = {}
+
         for arq in arquivos:
-            parts_nam_file: List[str] = arq.stem.split("_")
-            clico_outgoing_master: str = parts_nam_file[-3]
-            dt_file: str = parts_nam_file[-2]
-            time_file: str = parts_nam_file[-1]
-
-            f_dt_time_str: str = datetime.strptime(
-                f"{dt_file} {time_file}", "%d%m%Y %H%M%S"
-            ).strftime(FORMAT_DATE_TIME)
-            f_dt_str: str = datetime.strptime(dt_file, "%d%m%Y").strftime(FORMAT_DATE)
-
+            file_name, clico_outgoing_master, f_dt_str, f_dt_time_str = (
+                self._format_outgoing_files(path_file=arq)
+            )
             if f_dt_str not in dict_outgoing_arq:
                 dict_outgoing_arq[f_dt_str] = {}
 
-            raw: memoryview = get_bytes_to_file(arq.resolve())
+            raw: memoryview = get_bytes_to_file(arq)
             dict_outgoing_arq[f_dt_str][clico_outgoing_master] = TupleManagerFile(
-                file_name=arq.name,
+                file_name=file_name,
                 file_dt_time=f_dt_time_str,
                 bytes_file=raw,
             )
@@ -191,8 +206,8 @@ if __name__ == "__main__":
 
     arq = FileManagerProcessadora()
 
-    a = arq.get_files_for_cycle(date_file="25/06/2025", cycle="CIC2")
+    # a = arq.get_files_for_date(date_file="26/06/2025")
 
-    print(a.bytes_file)
+    # print(a)
 
-    print(FileManagerData().get_files_for_date(date_file="26/05/2025"))
+    # print(FileManagerData().get_files_for_date(date_file="26/05/2025"))
