@@ -5,6 +5,6 @@ file = MastercardISO8583Parse()
 
 raw = file.file_contents(date_file="26/05/2025", cycle="CIC2")
 
-iso, iso2 = file.parse_ipm(raw=raw)
+iso = file.parse_ipm(raw=raw)
 
-print(iso[1])
+print(iso[0])

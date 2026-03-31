@@ -4,8 +4,7 @@ from ..template import mastercard
 from starkbank import iso8583
 
 
-class ISO8583ParseError(Exception):
-    pass
+class ISO8583ParseError(Exception): ...
 
 
 class MastercardISO8583Parse:
@@ -21,7 +20,7 @@ class MastercardISO8583Parse:
         self, raw: memoryview, index: int, len_raw: int
     ) -> Tuple[bytes, int]:
 
-        START: Final[int] = index
+        start: int = index
         payload: bytearray = bytearray()
         index_current: int = index
         payload_extend = payload.extend
@@ -44,37 +43,31 @@ class MastercardISO8583Parse:
             if index_current + 2 < len_raw and raw[index_current + 2] == 0:
                 break
 
-        return bytes(payload), index_current - START
+        return bytes(payload), index_current - start
 
     def _playload_ipm_file(
         self,
         raw: memoryview,
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    ) -> List[Dict[str, Any]]:
 
-        LEN_RAW: Final[int] = len(raw)
+        len_raw: int = len(raw)
         index: int = 0
         msg_count: int = 0
-        parser_mti_main: List[Dict[str, Any]] = []
-        parser_mti_secondary: List[Dict[str, Any]] = []
+        parser_mti: List[Dict[str, Any]] = []
         extract_iso = self._extract_iso_payload
-        append_mti_main = parser_mti_main.append
-        append_mti_secondary = parser_mti_secondary.append
+        append_mti = parser_mti.append
 
         try:
-            while index < LEN_RAW:
+            while index < len_raw:
 
-                payload, consumed = extract_iso(raw=raw, index=index, len_raw=LEN_RAW)
+                payload, consumed = extract_iso(raw=raw, index=index, len_raw=len_raw)
                 index += consumed
 
                 message_parser: Dict[str, Any] = iso8583.parse(
                     message=payload, template=mastercard, encoding="cp500"
                 )
 
-                if message_parser["MTI"] == self._MTI:
-                    append_mti_main(message_parser)
-
-                if message_parser["MTI"] != self._MTI:
-                    append_mti_secondary(message_parser)
+                append_mti(message_parser)
 
                 msg_count += 1
 
@@ -82,7 +75,7 @@ class MastercardISO8583Parse:
             msg_error = f"Erro na mensagem #{msg_count + 1} (offset {index})"
             raise ISO8583ParseError(msg_error) from e
 
-        return parser_mti_main, parser_mti_secondary
+        return parser_mti
 
     def file_contents(
         self, date_file: str, cycle: Literal["CIC1", "CIC2", "CIC3"]
@@ -94,15 +87,11 @@ class MastercardISO8583Parse:
 
         return bytes_file
 
-    def parse_ipm(
-        self, raw: memoryview
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def parse_ipm(self, raw: memoryview) -> List[Dict[str, Any]]:
 
-        mti_primary, mti_secundary = self._playload_ipm_file(
+        return self._playload_ipm_file(
             raw=raw,
         )
-
-        return mti_primary, mti_secundary
 
 
 if __name__ == "__main__":
@@ -111,6 +100,6 @@ if __name__ == "__main__":
 
     raw = file.file_contents(date_file="26/05/2025", cycle="CIC2")
 
-    iso, iso2 = file.parse_ipm(raw=raw)
+    iso = file.parse_ipm(raw=raw)
 
     # print(iso[1])

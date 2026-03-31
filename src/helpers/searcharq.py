@@ -122,9 +122,9 @@ class FileManagerData:
 
     def __init__(self) -> None:
 
-        self._OUTGOING_FILES: Final[FileLoadData] = self._get_file_manager_data()
+        self._OUTGOING_FILES: Final[FileLoadData] = self._load_outgoing_files()
 
-    def _get_file_manager_data(self) -> FileLoadData:
+    def _load_outgoing_files(self) -> FileLoadData:
 
         BASE_DIR: Final[Path] = Path(__file__).parent.parent.parent
         DATA_DIR = BASE_DIR / "data"
