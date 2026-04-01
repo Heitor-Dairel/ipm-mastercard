@@ -156,9 +156,12 @@ class MastercardISO8583Parse(FilesDataSaving):
 
         return headerd_elements, data_elements
 
-    def file_contents(
-        self, date_file: str, cycle: Literal["CIC1", "CIC2", "CIC3"]
-    ) -> Tuple[str, memoryview]:
+    def parse_ipm(
+        self,
+        date_file: str,
+        cycle: Literal["CIC1", "CIC2", "CIC3"],
+        logging: bool = True,
+    ) -> List[Dict[str, Any]]:
 
         self._file_cycle = cycle
 
@@ -168,11 +171,7 @@ class MastercardISO8583Parse(FilesDataSaving):
             )
         )
 
-        return self._file_name, bytes_file
-
-    def parse_ipm(self, raw: memoryview, logging: bool = True) -> List[Dict[str, Any]]:
-
-        return self._playload_ipm_file(raw=raw, logging=logging)
+        return self._playload_ipm_file(raw=bytes_file, logging=logging)
 
     def output_excel(
         self,
@@ -189,9 +188,6 @@ class MastercardISO8583Parse(FilesDataSaving):
 if __name__ == "__main__":
 
     file = MastercardISO8583Parse()
-
-    file_name, raw = file.file_contents(date_file="26/05/2025", cycle="CIC2")
-
-    iso = file.parse_ipm(raw=raw)
+    iso = file.parse_ipm(date_file="26/05/2025", cycle="CIC2")
 
     # print(iso[1])
