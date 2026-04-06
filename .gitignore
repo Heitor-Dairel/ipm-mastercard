@@ -100,5 +100,4 @@ htmlcov/
 *.bak
 *.swp
 *.swo
-data/
 output/
