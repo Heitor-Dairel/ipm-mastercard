@@ -1,4 +1,4 @@
-from typing import List, Final, Tuple, Dict, Any, Literal, Optional, Set
+from typing import List, Final, Tuple, Dict, Any, Literal, Optional
 from ..helpers import search_arq, FilesDataSaving, TupleManagerFile
 from ..template import mastercard
 from ..util import print_custom_text
@@ -13,8 +13,7 @@ class MastercardISO8583Parse(FilesDataSaving):
     def __init__(self) -> None:
         super().__init__()
         self._MTI: Final[str] = "1240"
-        self._file_name: str = ""
-        self._file_dt_time: str = ""
+        self._file_name: Optional[str] = ""
         self._file_cycle: str = ""
 
     def _extract_iso_payload(
@@ -79,11 +78,10 @@ class MastercardISO8583Parse(FilesDataSaving):
             self._logging(
                 file_name=self._file_name,
                 cycle=self._file_cycle,
-                file_dt_time=self._file_dt_time,
                 row_count=msg_count,
             )
 
-        self._output_txt(parse=parse_mti)
+        self._output_txt_logging(parse=parse_mti)
 
         return parse_mti
 
@@ -91,15 +89,14 @@ class MastercardISO8583Parse(FilesDataSaving):
         self,
         file_name: Optional[str],
         cycle: Optional[str],
-        file_dt_time: Optional[str],
         row_count: int,
     ) -> None:
 
         separator: str = "=" * 63
 
         body: str = (
-            f"{separator}\n - FILE NAME: {file_name}\n"
-            f" - DATE/HOUR: {file_dt_time}\n"
+            f"{separator}\n"
+            f" - FILE NAME: {file_name}\n"
             f" - CYCLE: {cycle}\n"
             f" - ROW COUNT: {row_count}\n"
             f"{separator}\n\n"
@@ -107,51 +104,11 @@ class MastercardISO8583Parse(FilesDataSaving):
 
         print_custom_text(text=body, highlight=["Bold"], color_foreground="OrangeRed1")
 
-    def _output_txt(self, parse: List[Dict[str, Any]]):
+    def _output_txt_logging(self, parse: List[Dict[str, Any]]) -> None:
 
-        self.save_txt(data=parse, file_name=self._file_name[:-4])
+        if self._file_name:
 
-    def _clean_parse(
-        self, parse: List[Dict[str, Any]], field: List[str], enable_field: bool = False
-    ) -> Tuple[List[str], List[Dict[str, Any]]]:
-
-        data_elements: List[Dict[str, Any]] = []
-        append_data_elements = data_elements.append
-        elements: Set[str] = set(field)
-        trash_elements: Final[Set[str]] = {"BMP", "DE001", "PDS", "Length"}
-        elements.update(trash_elements)
-
-        for i in parse:
-
-            if i["MTI"] == "1240":
-
-                data: Dict[str, Any] = {}
-
-                if not enable_field:
-
-                    for key, item in i.items():
-                        if key not in elements:
-                            data[key] = item
-
-                    for key, item in i["PDS"].items():
-                        if key not in elements:
-                            data[key] = item
-
-                if enable_field:
-
-                    for key, item in i.items():
-                        if key in elements and key not in trash_elements:
-                            data[key] = item
-
-                    for key, item in i["PDS"].items():
-                        if key in elements and key not in trash_elements:
-                            data[key] = item
-
-                append_data_elements(data)
-
-        headerd_elements: List[str] = [key for key, _ in data_elements[0].items()]
-
-        return headerd_elements, data_elements
+            self.save_txt(data=parse, file_name=self._file_name)
 
     def parse_ipm(
         self,
@@ -163,27 +120,16 @@ class MastercardISO8583Parse(FilesDataSaving):
         self._file_cycle = cycle
 
         file_infos: Optional[TupleManagerFile] = search_arq(
-            date_file=date_file, cycle=cycle
+            file_date=date_file, cycle=cycle
         )
 
         if file_infos:
 
-            self._file_name, self._file_dt_time, bytes_file = file_infos
+            self._file_name, bytes_file = file_infos
 
             return self._playload_ipm_file(raw=bytes_file, logging=logging)
 
         return None
-
-    def output_excel(
-        self,
-        parse: List[Dict[str, Any]],
-        field: List[str],
-        enable_field: bool = False,
-    ) -> None:
-        header, data = self._clean_parse(
-            parse=parse, field=field, enable_field=enable_field
-        )
-        self.save_csv(data=data, headers=header, file_name=self._file_name[:-4])
 
 
 if __name__ == "__main__":
