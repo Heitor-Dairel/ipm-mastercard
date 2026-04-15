@@ -154,9 +154,7 @@ class DbOutgouing:
                 returning=True,
             )
 
-            result = self._cur.fetchone()
-
-            row_id: Optional[Tuple[int]] = result
+            row_id: Optional[Tuple[int]] = self._cur.fetchone()
             new_id = row_id[0] if row_id else 0
 
             with self._cur.copy(DbOutgouing._COPY_SQL) as copy:
