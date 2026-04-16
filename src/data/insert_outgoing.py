@@ -1,5 +1,5 @@
-from ..core import MastercardISO8583Parse
-from typing import Optional, List, Literal, Union, Tuple
+from ..core import MastercardISO8583Parse, ParseDb
+from typing import Optional, List, Literal, Tuple
 from psycopg import Connection, ServerCursor
 from psycopg.rows import TupleRow
 from dotenv import load_dotenv
@@ -96,7 +96,7 @@ class DbOutgouing:
 
         file_name: Optional[str] = None
         date_reference: Optional[str] = None
-        arq_parse: Optional[List[List[Union[int, str, float, None]]]] = None
+        arq_parse: Optional[ParseDb] = None
 
         parse = self._parse.parse_ipm_db(
             date_file=date_file, cycle=cycle, logging=logging
@@ -122,9 +122,9 @@ class DbOutgouing:
 
     def _exists_file_master(self, file_name: str) -> bool:
 
-        result = self._cur.execute(self._EXISTS_FILE, (file_name,))
+        cur_result = self._cur.execute(self._EXISTS_FILE, (file_name,))
 
-        if result.fetchone():
+        if cur_result.fetchone():
 
             self._cur.close()
 
@@ -141,7 +141,7 @@ class DbOutgouing:
         file_name: str,
         cycle: str,
         date_reference: str,
-        parse: List[List[Union[int, str, float, None]]],
+        parse: ParseDb,
     ) -> None:
 
         arq_parse = parse
@@ -164,15 +164,14 @@ class DbOutgouing:
                     copy.write_row(row)
 
             self._conn.commit()
+            self._cur.close()
+            self._conn.close()
 
             qtd_rows_insert: str = f"{len(arq_parse):,}".replace(",", ".")
 
             print(
                 f"{qtd_rows_insert} de linhas do arquivo {file_name}, foram inseridas com sucesso na tabela TB_MASTER_ARQUIVO_DETALHADO."
             )
-
-            self._cur.close()
-            self._conn.close()
 
         except Exception as e:
 
@@ -182,7 +181,7 @@ class DbOutgouing:
 
             self._conn.close()
 
-            print(f"Erro: {e}")
+            print(f"Error: {e}")
 
         return None
 
@@ -191,7 +190,7 @@ class DbOutgouing:
         file_name: str,
         cycle: str,
         date_reference: str,
-        parse: List[List[Union[int, str, float, None]]],
+        parse: ParseDb,
     ) -> None:
 
         if not self._exists_file_master(file_name=file_name):

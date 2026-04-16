@@ -6,6 +6,9 @@ from starkbank import iso8583
 from datetime import datetime
 
 
+type ParseDb = List[List[Union[int, str, float, None]]]
+
+
 class ISO8583ParseError(Exception): ...
 
 
@@ -115,13 +118,13 @@ class MastercardISO8583Parse(FilesDataSaving):
         date_file: str,
         cycle: Literal["CIC1", "CIC2", "CIC3"],
         logging: bool = True,
-    ) -> Optional[Tuple[List[List[Union[int, str, float, None]]], str]]:
+    ) -> Optional[Tuple[ParseDb, str]]:
 
         file_infos: Optional[TupleManagerFile] = file_search(
             file_date=date_file, cycle=cycle
         )
 
-        list_files: List[List[Union[int, str, float, None]]] = []
+        list_files: ParseDb = []
 
         if file_infos:
             file_name, bytes_file = file_infos
