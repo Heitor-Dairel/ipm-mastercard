@@ -1,11 +1,10 @@
 from typing import (
     Final,
-    Literal,
-    NamedTuple,
     Iterator,
     Optional,
     Generator,
 )
+from ..models import CycleIPM, TupleManagerFile
 from pathlib import Path
 from datetime import datetime
 from rich import print
@@ -15,12 +14,6 @@ _BASE_DIR: Final[Path] = Path(
     r"\Operação Processadora - Arquivos CSU"
 )
 _FLAG_DIR: Final[str] = "(1)"
-
-
-class TupleManagerFile(NamedTuple):
-
-    file_name: str
-    bytes_file: memoryview
 
 
 class DateInvalidFormat(ValueError): ...
@@ -43,9 +36,7 @@ def _file_bytes(file_path: Path) -> memoryview:
     return raw
 
 
-def file_search(
-    file_date: str, cycle: Literal["CIC1", "CIC2", "CIC3"]
-) -> Optional[TupleManagerFile]:
+def file_search(file_date: str, cycle: CycleIPM) -> Optional[TupleManagerFile]:
 
     _validate_date(date=file_date)
 
