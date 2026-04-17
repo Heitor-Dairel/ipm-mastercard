@@ -1,12 +1,10 @@
-from typing import List, Tuple, Dict, Any, Literal, Optional, Union
+from typing import List, Tuple, Dict, Any, Optional
 from ..helpers import file_search, FilesDataSaving, TupleManagerFile
 from ..template import mastercard
 from ..util import print_custom_text
+from ..models import ParseDb, ParseIPM, CycleIPM
 from starkbank import iso8583
 from datetime import datetime
-
-
-type ParseDb = List[List[Union[int, str, float, None]]]
 
 
 class ISO8583ParseError(Exception): ...
@@ -46,7 +44,7 @@ class MastercardISO8583Parse(FilesDataSaving):
 
         return bytes(payload), index_current - start
 
-    def _playload_ipm_file(self, raw: memoryview) -> Tuple[List[Dict[str, Any]], int]:
+    def _playload_ipm_file(self, raw: memoryview) -> Tuple[ParseIPM, int]:
 
         len_raw: int = len(raw)
         index: int = 0
@@ -75,9 +73,7 @@ class MastercardISO8583Parse(FilesDataSaving):
 
         return parse_mti, msg_count
 
-    def _logging(
-        self, file_name: str, row_count: int, data: List[Dict[str, Any]]
-    ) -> None:
+    def _logging(self, file_name: str, row_count: int, data: ParseIPM) -> None:
 
         separator: str = "=" * 63
 
@@ -95,9 +91,9 @@ class MastercardISO8583Parse(FilesDataSaving):
     def parse_ipm(
         self,
         date_file: str,
-        cycle: Literal["CIC1", "CIC2", "CIC3"],
+        cycle: CycleIPM,
         logging: bool = True,
-    ) -> Optional[Tuple[List[Dict[str, Any]], str]]:
+    ) -> Optional[Tuple[ParseIPM, str]]:
 
         file_infos: Optional[TupleManagerFile] = file_search(
             file_date=date_file, cycle=cycle
@@ -116,7 +112,7 @@ class MastercardISO8583Parse(FilesDataSaving):
     def parse_ipm_db(
         self,
         date_file: str,
-        cycle: Literal["CIC1", "CIC2", "CIC3"],
+        cycle: CycleIPM,
         logging: bool = True,
     ) -> Optional[Tuple[ParseDb, str]]:
 

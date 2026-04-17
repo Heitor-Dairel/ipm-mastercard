@@ -1,5 +1,6 @@
-from ..core import MastercardISO8583Parse, ParseDb
-from typing import Optional, List, Literal, Tuple
+from ..core import MastercardISO8583Parse
+from ..models import ParseDb, CycleIPM
+from typing import Optional, List, Tuple
 from psycopg import Connection, ServerCursor
 from psycopg.rows import TupleRow
 from dotenv import load_dotenv
@@ -90,7 +91,7 @@ class DbOutgouing:
     def iso_db(
         self,
         date_file: str,
-        cycle: Literal["CIC1", "CIC2", "CIC3"],
+        cycle: CycleIPM,
         logging: bool = True,
     ) -> None:
 

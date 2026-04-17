@@ -1,4 +1,5 @@
-from typing import Dict, List, Any, Final
+from typing import List, Final
+from ..models import ParseIPM
 from pathlib import Path
 import csv
 import json
@@ -21,9 +22,7 @@ class FilesDataSaving:
 
         return DATA_DIR
 
-    def _save_csv(
-        self, data: List[Dict[str, Any]], headers: List[str], file_name: str
-    ) -> None:
+    def _save_csv(self, data: ParseIPM, headers: List[str], file_name: str) -> None:
 
         file_path = self._output_path_abs / f"{file_name}.csv"
         with open(file_path, "w", newline="", encoding="utf-8-sig") as f:
@@ -36,7 +35,7 @@ class FilesDataSaving:
             if headers:
                 writer.writerows(data)
 
-    def _save_txt(self, data: List[Dict[str, Any]], file_name: str) -> None:
+    def _save_txt(self, data: ParseIPM, file_name: str) -> None:
 
         with open(
             self._output_path_abs / f"{file_name}.txt.log", "w", encoding="utf-8"
