@@ -44,16 +44,6 @@ The parser performs the following steps:
 
 ---
 
-## 📌 Possible Improvements
-
-- Support for other ISO8583 standards (1987, 2003)
-- Graphical interface or REST API
-- Structured logs
-- Message validation
-- Automated tests
-
----
-
 ## 📄 License
 
 This project is under the [MIT license](LICENSE).
