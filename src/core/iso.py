@@ -1,10 +1,11 @@
 from typing import List, Tuple, Dict, Any, Optional
-from ..helpers import file_search, FilesDataSaving, TupleManagerFile
+from ..helpers import file_search, FilesDataSaving
 from ..template import mastercard
 from ..utils import print_custom_text
-from ..models import ParseDb, ParseIPM, CycleIPM
+from ..models import ParseDb, ParseIPM, CycleIPM, TupleManagerFile
 from starkbank import iso8583
 from datetime import datetime
+from rich import print
 
 
 class ISO8583ParseError(Exception): ...
@@ -179,6 +180,7 @@ class MastercardISO8583Parse(FilesDataSaving):
 if __name__ == "__main__":
 
     file = MastercardISO8583Parse()
-    iso = file.parse_ipm(date_file="26/05/2025", cycle="CIC2")
-
-    # print(iso[1])
+    parse = file.parse_ipm(date_file="03/02/2026", cycle="CIC1")
+    if parse:
+        iso, name = parse
+        print(iso[0])
