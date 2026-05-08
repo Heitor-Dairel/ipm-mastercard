@@ -1,8 +1,8 @@
-from src.core import MastercardISO8583Parse
 import timeit
 
+from src.core import MastercardIso8583Parse
 
-file = MastercardISO8583Parse()
+file = MastercardIso8583Parse()
 
 raw = file.file_contents(date_file="26/05/2025", cycle="CIC2")
 

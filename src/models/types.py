@@ -1,8 +1,11 @@
-from typing import Any, Dict, List, Literal, NamedTuple, Union
+from typing import Any, Dict, List, Literal, NamedTuple, Optional, Tuple, TypeVar, Union
 
-type ParseDb = List[List[Union[int, str, float, None]]]
-type ParseIPM = List[Dict[str, Any]]
-type CycleIPM = Literal["CIC1", "CIC2", "CIC3"]
+type TypeIpmDb = Union[int, str, float, None]
+type TypeIpm = List[Dict[str, Any]]
+type TypeParseIpm = Optional[Tuple[TypeIpm, str]]
+type TypeCycleIpm = Literal["CIC1", "CIC2", "CIC3"]
+type TypeParseIpmDb = Optional[Tuple[List[List[TypeIpmDb]], str]]
+T = TypeVar("T")
 
 
 class TupleManagerFile(NamedTuple):

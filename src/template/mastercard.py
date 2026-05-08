@@ -13,6 +13,8 @@ from starkbank.iso8583.utils.parser import (
     ParseString,
 )
 
+from ..utils import ParseDate, ParseField, ParseInteger, ParseStringDb, TemplateDb
+
 
 class IsoVersion:
     VERSION_1987: Final[str] = "1987"
@@ -1344,3 +1346,40 @@ mastercard: Dict[str, Template] = {
         ],
     ),
 }
+
+mastercard_db: TemplateDb = TemplateDb(
+    fields=[
+        ParseField(name="MTI", parse=ParseStringDb()),
+        ParseField(name="DE002", parse=ParseStringDb()),
+        ParseField(name="DE003", parse=ParseStringDb()),
+        ParseField(name="DE004", parse=ParseInteger()),
+        ParseField(name="DE012", parse=ParseDate()),
+        ParseField(name="DE014", parse=ParseDate()),
+        ParseField(name="DE022", parse=ParseStringDb()),
+        ParseField(name="DE023", parse=ParseStringDb()),
+        ParseField(name="DE024", parse=ParseStringDb()),
+        ParseField(name="DE025", parse=ParseStringDb()),
+        ParseField(name="DE026", parse=ParseInteger()),
+        ParseField(name="DE031", parse=ParseStringDb()),
+        ParseField(name="DE033", parse=ParseStringDb()),
+        ParseField(name="DE038", parse=ParseStringDb()),
+        ParseField(name="DE040", parse=ParseStringDb()),
+        ParseField(name="DE041", parse=ParseStringDb()),
+        ParseField(name="DE042", parse=ParseStringDb()),
+        ParseField(name="DE043", parse=ParseStringDb()),
+        ParseField(name="DE049", parse=ParseStringDb()),
+        ParseField(name="DE063", parse=ParseStringDb()),
+        ParseField(name="DE093", parse=ParseStringDb()),
+        ParseField(name="DE094", parse=ParseStringDb()),
+        ParseField(name="PDS0023", parse=ParseStringDb()),
+        ParseField(name="PDS0052", parse=ParseStringDb()),
+        ParseField(name="PDS0148", parse=ParseStringDb()),
+        ParseField(name="PDS0158", parse=ParseStringDb()),
+        ParseField(name="PDS0165", parse=ParseStringDb()),
+        ParseField(name="PDS0170", parse=ParseStringDb()),
+        ParseField(name="PDS0220", parse=ParseStringDb()),
+        ParseField(name="PDS0375", parse=ParseStringDb()),
+        ParseField(name="DE063", parse=ParseStringDb(), custom=True),
+        ParseField(name="PDS0158", parse=ParseStringDb(), custom=True),
+    ]
+)

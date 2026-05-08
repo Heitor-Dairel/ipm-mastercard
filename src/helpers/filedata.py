@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Final, List
 
-from ..models import ParseIPM
+from ..models import TypeIpm
 
 
 class FilesDataSaving:
@@ -22,7 +22,7 @@ class FilesDataSaving:
 
         return DATA_DIR
 
-    def _save_csv(self, data: ParseIPM, headers: List[str], file_name: str) -> None:
+    def _save_csv(self, data: TypeIpm, headers: List[str], file_name: str) -> None:
 
         file_path = self._output_path_abs / f"{file_name}.csv"
         with open(file_path, "w", newline="", encoding="utf-8-sig") as f:
@@ -35,7 +35,7 @@ class FilesDataSaving:
             if headers:
                 writer.writerows(data)
 
-    def _save_txt(self, data: ParseIPM, file_name: str) -> None:
+    def _save_txt(self, data: TypeIpm, file_name: str) -> None:
 
         with open(
             self._output_path_abs / f"{file_name}.txt.log", "w", encoding="utf-8"

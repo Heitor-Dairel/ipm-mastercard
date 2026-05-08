@@ -8,8 +8,8 @@ from psycopg import Connection, ServerCursor
 from psycopg.rows import TupleRow
 from rich import print
 
-from ..core import MastercardISO8583Parse
-from ..models import CycleIPM, ParseDb
+from ..core import MastercardIso8583Parse
+from ..models import TypeCycleIpm, TypeIpmDb, TypeParseIpmDb
 
 load_dotenv()
 
@@ -76,7 +76,7 @@ class DbOutgouing:
             password=password,
         )
         self._cur: ServerCursor[TupleRow] = self._conn.cursor()
-        self._parse: MastercardISO8583Parse = MastercardISO8583Parse()
+        self._parse: MastercardIso8583Parse = MastercardIso8583Parse()
 
     def _date_reference_file(self, file_name: str) -> str:
 
@@ -91,17 +91,16 @@ class DbOutgouing:
     def iso_db(
         self,
         date_file: str,
-        cycle: CycleIPM,
+        cycle: TypeCycleIpm,
         logging: bool = True,
     ) -> None:
 
         file_name: Optional[str] = None
         date_reference: Optional[str] = None
-        arq_parse: Optional[ParseDb] = None
+        arq_parse: Optional[List[List[TypeIpmDb]]] = None
+        self._parse.search_ipm(date_file=date_file, cycle=cycle)
 
-        parse = self._parse.parse_ipm_db(
-            date_file=date_file, cycle=cycle, logging=logging
-        )
+        parse: TypeParseIpmDb = self._parse.parse_ipm_db(logging=logging)
 
         if parse:
             arq_parse, file_name = parse
@@ -139,7 +138,7 @@ class DbOutgouing:
         file_name: str,
         cycle: str,
         date_reference: str,
-        parse: ParseDb,
+        parse: List[List[TypeIpmDb]],
     ) -> None:
 
         arq_parse = parse
@@ -185,7 +184,7 @@ class DbOutgouing:
         file_name: str,
         cycle: str,
         date_reference: str,
-        parse: ParseDb,
+        parse: List[List[TypeIpmDb]],
     ) -> None:
 
         if not self._exists_file_master(file_name=file_name):

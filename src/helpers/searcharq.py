@@ -9,7 +9,7 @@ from typing import (
 
 from rich import print
 
-from ..models import CycleIPM, TupleManagerFile
+from ..models import TupleManagerFile, TypeCycleIpm
 
 _BASE_DIR: Final[Path] = Path(
     r"C:\Users\heitor.tavares\OneDrive - TRIVALE ADMINISTRACAO LTDA"
@@ -38,7 +38,7 @@ def _file_bytes(file_path: Path) -> memoryview:
     return raw
 
 
-def file_search(file_date: str, cycle: CycleIPM) -> Optional[TupleManagerFile]:
+def file_search(file_date: str, cycle: TypeCycleIpm) -> Optional[TupleManagerFile]:
 
     _validate_date(date=file_date)
 

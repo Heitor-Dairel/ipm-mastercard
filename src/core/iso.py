@@ -1,21 +1,28 @@
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-from rich import print
 from starkbank import iso8583
 
 from ..helpers import FilesDataSaving, file_search
-from ..models import CycleIPM, ParseDb, ParseIPM, TupleManagerFile
-from ..template import mastercard
-from ..utils import print_custom_text
+from ..models import (
+    TupleManagerFile,
+    TypeCycleIpm,
+    TypeIpm,
+    TypeIpmDb,
+    TypeParseIpm,
+    TypeParseIpmDb,
+)
+from ..template import mastercard, mastercard_db
+from ..utils import BeautifyIpmDb, print_custom_text
 
 
 class ISO8583ParseError(Exception): ...
 
 
-class MastercardISO8583Parse(FilesDataSaving):
+class MastercardIso8583Parse(FilesDataSaving):
     def __init__(self) -> None:
         super().__init__()
+
+        self._file_info: Optional[TupleManagerFile] = None
 
     def _extract_iso_payload(
         self, raw: memoryview, index: int, len_raw: int
@@ -39,14 +46,14 @@ class MastercardISO8583Parse(FilesDataSaving):
             payload_extend(raw[index_current + 4 : index_current + 4 + payload_len])
             index_current += 4 + payload_len
 
-            if seg_id == 0:
+            if not seg_id:
                 break
             if index_current + 2 < len_raw and raw[index_current + 2] == 0:
                 break
 
         return bytes(payload), index_current - start
 
-    def _playload_ipm_file(self, raw: memoryview) -> Tuple[ParseIPM, int]:
+    def _playload_ipm_file(self, raw: memoryview) -> Tuple[TypeIpm, int]:
 
         len_raw: int = len(raw)
         index: int = 0
@@ -74,7 +81,7 @@ class MastercardISO8583Parse(FilesDataSaving):
 
         return parse_mti, msg_count
 
-    def _logging(self, file_name: str, row_count: int, data: ParseIPM) -> None:
+    def _logging(self, file_name: str, row_count: int, data: TypeIpm) -> None:
 
         separator: str = "=" * 63
 
@@ -89,19 +96,19 @@ class MastercardISO8583Parse(FilesDataSaving):
 
         print_custom_text(text=body, highlight=["Bold"], color_foreground="OrangeRed1")
 
-    def parse_ipm(
-        self,
-        date_file: str,
-        cycle: CycleIPM,
-        logging: bool = True,
-    ) -> Optional[Tuple[ParseIPM, str]]:
+    def search_ipm(self, date_file: str, cycle: TypeCycleIpm) -> None:
 
-        file_infos: Optional[TupleManagerFile] = file_search(
+        self._file_infos: Optional[TupleManagerFile] = file_search(
             file_date=date_file, cycle=cycle
         )
 
-        if file_infos:
-            file_name, bytes_file = file_infos
+    def parse_ipm(
+        self,
+        logging: bool = True,
+    ) -> TypeParseIpm:
+
+        if self._file_infos:
+            file_name, bytes_file = self._file_infos
             parse_ipm, msg_count = self._playload_ipm_file(raw=bytes_file)
             if logging:
                 self._logging(file_name=file_name, row_count=msg_count, data=parse_ipm)
@@ -112,72 +119,34 @@ class MastercardISO8583Parse(FilesDataSaving):
 
     def parse_ipm_db(
         self,
-        date_file: str,
-        cycle: CycleIPM,
         logging: bool = True,
-    ) -> Optional[Tuple[ParseDb, str]]:
+    ) -> TypeParseIpmDb:
 
-        file_infos: Optional[TupleManagerFile] = file_search(
-            file_date=date_file, cycle=cycle
-        )
-
-        list_files: ParseDb = []
-
-        if file_infos:
-            file_name, bytes_file = file_infos
+        if self._file_infos:
+            file_name, bytes_file = self._file_infos
             parse_ipm, msg_count = self._playload_ipm_file(raw=bytes_file)
             if logging:
                 self._logging(file_name=file_name, row_count=msg_count, data=parse_ipm)
 
-            for i in parse_ipm:
-                if i["MTI"] == "1240":
-                    list_files.append(
-                        [
-                            i["MTI"],
-                            i["DE002"],
-                            i["DE003"],
-                            int(i["DE004"]) / 100,
-                            datetime.strptime(i["DE012"], "%y%m%d%H%M%S").strftime(
-                                "%d/%m/%Y %H:%M:%S"
-                            ),
-                            datetime.strptime(i["DE014"], "%y%m").strftime("%y/%m"),
-                            i["DE022"],
-                            i["DE023"],
-                            i["DE024"],
-                            i["DE025"],
-                            int(i["DE026"]),
-                            i["DE031"],
-                            i["DE033"],
-                            i["DE038"],
-                            i.get("DE040"),
-                            i["DE041"],
-                            i["DE042"],
-                            i["DE043"],
-                            i["DE049"],
-                            i["DE063"].strip(),
-                            i["DE093"],
-                            i["DE094"],
-                            i["PDS"]["PDS0023"].strip(),
-                            i["PDS"]["PDS0052"].strip(),
-                            i["PDS"]["PDS0148"].strip(),
-                            i["PDS"]["PDS0158"].strip(),
-                            i["PDS"]["PDS0165"].strip(),
-                            i["PDS"]["PDS0170"].strip(),
-                            i["PDS"]["PDS0220"],
-                            i["PDS"]["PDS0375"],
-                            i["DE063"].strip()[:3],
-                            i["PDS"]["PDS0158"].strip()[:2],
-                        ]
-                    )
+            ipm_db: BeautifyIpmDb = BeautifyIpmDb(
+                template=mastercard_db, elements=parse_ipm
+            )
 
-            return list_files, file_name
+            parse_db: List[List[TypeIpmDb]] = ipm_db.parse()
+
+            return parse_db, file_name
 
         return None
 
 
 if __name__ == "__main__":
-    file = MastercardISO8583Parse()
-    parse = file.parse_ipm(date_file="03/02/2026", cycle="CIC1")
+    master = MastercardIso8583Parse()
+    file = master.search_ipm(date_file="01/04/2026", cycle="CIC2")
+    parse = master.parse_ipm()
+    count = 0
     if parse:
         iso, name = parse
-        print(iso[0])
+        for i in iso:
+            if i["MTI"] == "1240":
+                count += 1
+        print(count)
