@@ -4,7 +4,6 @@ from .types import (
     FG_COLORS_SEARCH,
     HIGHLIGHT,
     HIGHLIGHTS,
-    T,
     TupleManagerFile,
     TypeCycleIpm,
     TypeIpm,
@@ -25,5 +24,4 @@ __all__ = [
     "BG_COLORS_SEARCH",
     "FG_COLORS_SEARCH",
     "COLORS",
-    "T",
 ]
