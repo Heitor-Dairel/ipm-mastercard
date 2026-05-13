@@ -1,12 +1,15 @@
-import csv
+import copy
 import json
 from pathlib import Path
-from typing import Final, List
+from typing import Any, Dict, Final, List, Literal
+
+import polars as pl
+from polars import DataFrame
 
 from ..models import TypeIpm
 
 
-class FilesDataSaving:
+class FilesDataLogging:
     def __init__(self) -> None:
         self._output_path_abs: Path = self._output_path()
 
@@ -22,22 +25,38 @@ class FilesDataSaving:
 
         return DATA_DIR
 
-    def _save_csv(self, data: TypeIpm, headers: List[str], file_name: str) -> None:
+    def logging_file(
+        self, data: TypeIpm, file_name: str, type_logg: List[Literal["csv", "txt"]]
+    ) -> None:
 
-        file_path = self._output_path_abs / f"{file_name}.csv"
-        with open(file_path, "w", newline="", encoding="utf-8-sig") as f:
-            writer = csv.DictWriter(
-                f, fieldnames=headers, extrasaction="ignore", delimiter=";"
-            )
+        if "csv" in type_logg:
+            self._logging_csv(data=data, file_name=file_name)
 
-            writer.writeheader()
-
-            if headers:
-                writer.writerows(data)
+        if "txt" in type_logg:
+            self._logging_txt(data=data, file_name=file_name)
 
         return None
 
-    def _save_txt(self, data: TypeIpm, file_name: str) -> None:
+    def _key_delete(self, data: Dict[str, Any], *args: str) -> Dict[str, Any]:
+        data_copy: Dict[str, Any] = copy.deepcopy(data)
+        for i in args:
+            data_copy.pop(i)
+        return data_copy
+
+    def _logging_csv(self, data: TypeIpm, file_name: str) -> None:
+        data_csv: TypeIpm = [
+            self._key_delete(i, "BMP", "DE001", "Length")
+            for i in data
+            if i["MTI"] == "1240"
+        ]
+
+        df: DataFrame = pl.DataFrame(data=data_csv).unnest("PDS")
+
+        df.write_csv(self._output_path_abs / f"{file_name}.csv")
+
+        return None
+
+    def _logging_txt(self, data: TypeIpm, file_name: str) -> None:
 
         with open(
             self._output_path_abs / f"{file_name}.txt.log", "w", encoding="utf-8"

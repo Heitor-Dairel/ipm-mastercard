@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Final, List, Optional, Tuple
 
 from starkbank import iso8583
 
-from ..helpers import FilesDataSaving, file_search
+from ..helpers import FilesDataLogging, file_search
 from ..models import (
     TupleManagerFile,
     TypeCycleIpm,
@@ -18,7 +18,29 @@ from ..utils import BeautifyIpmDb, print_custom_text
 class ISO8583ParseError(Exception): ...
 
 
-class MastercardIso8583Parse(FilesDataSaving):
+class MastercardIso8583Parse(FilesDataLogging):
+    _TITLE: Final[str] = """
+██████╗  █████╗ ██████╗ ███████╗███████╗
+██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔════╝
+██████╔╝███████║██████╔╝███████╗█████╗  
+██╔═══╝ ██╔══██║██╔══██╗╚════██║██╔══╝  
+██║     ██║  ██║██║  ██║███████║███████╗
+╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
+██╗███████╗ ██████╗      █████╗ ███████╗ █████╗ ██████╗        ██╗ █████╗  █████╗ ██████╗ 
+██║██╔════╝██╔═══██╗    ██╔══██╗██╔════╝██╔══██╗╚════██╗      ███║██╔══██╗██╔══██╗╚════██╗
+██║███████╗██║   ██║    ╚█████╔╝███████╗╚█████╔╝ █████╔╝█████╗╚██║╚██████║╚██████║ █████╔╝
+██║╚════██║██║   ██║    ██╔══██╗╚════██║██╔══██╗ ╚═══██╗╚════╝ ██║ ╚═══██║ ╚═══██║ ╚═══██╗
+██║███████║╚██████╔╝    ╚█████╔╝███████║╚█████╔╝██████╔╝       ██║ █████╔╝ █████╔╝██████╔╝
+╚═╝╚══════╝ ╚═════╝      ╚════╝ ╚══════╝ ╚════╝ ╚═════╝        ╚═╝ ╚════╝  ╚════╝ ╚═════╝ 
+
+
+███╗   ███╗ █████╗ ███████╗████████╗███████╗██████╗  ██████╗ █████╗ ██████╗ ██████╗ 
+████╗ ████║██╔══██╗██╔════╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗
+██╔████╔██║███████║███████╗   ██║   █████╗  ██████╔╝██║     ███████║██████╔╝██║  ██║
+██║╚██╔╝██║██╔══██║╚════██║   ██║   ██╔══╝  ██╔══██╗██║     ██╔══██║██╔══██╗██║  ██║
+██║ ╚═╝ ██║██║  ██║███████║   ██║   ███████╗██║  ██║╚██████╗██║  ██║██║  ██║██████╔╝
+╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ \n\n\n"""
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -83,16 +105,17 @@ class MastercardIso8583Parse(FilesDataSaving):
 
     def _logging(self, file_name: str, row_count: int, data: TypeIpm) -> None:
 
-        separator: str = "=" * 63
+        separator: str = "─" * 63
 
         body: str = (
-            f"{separator}\n"
-            f" - FILE NAME: {file_name}\n"
-            f" - ROW COUNT: {row_count}\n"
-            f"{separator}\n"
+            f"{self._TITLE}"
+            f"╭{separator}╮\n"
+            f"┃ ◉ FILE NAME: {file_name}     ┃\n"
+            f"┃ ◉ ROW COUNT: {row_count}{' ' * 45}┃\n"
+            f"╰{separator}╯\n"
         )
 
-        self._save_txt(data=data, file_name=file_name)
+        self.logging_file(data=data, file_name=file_name, type_logg=["csv", "txt"])
 
         print_custom_text(text=body, highlight=["Bold"], color_foreground="OrangeRed1")
 
@@ -151,4 +174,4 @@ if __name__ == "__main__":
         for i in iso:
             if i["MTI"] == "1240":
                 count += 1
-        print(count)
+        # print(count)
