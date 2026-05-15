@@ -1,10 +1,17 @@
-from datetime import datetime
 from typing import Any, Dict, Final, List, Optional, Tuple
 
 from starkbank import iso8583
 
-from ..helpers import FilesDataLogging, file_search
+from ..helpers import (
+    FilesDataLogging,
+    file_search,
+    format_date,
+    format_size,
+    format_space,
+)
 from ..models import (
+    FG_COLORS_SEARCH,
+    HIGHLIGHT,
     TupleManagerFile,
     TypeCycleIpm,
     TypeIpm,
@@ -34,16 +41,41 @@ class MastercardIso8583Parse(FilesDataLogging):
     ██║███████║╚██████╔╝    ╚█████╔╝███████║╚█████╔╝██████╔╝       ██║ █████╔╝ █████╔╝██████╔╝
     ╚═╝╚══════╝ ╚═════╝      ╚════╝ ╚══════╝ ╚════╝ ╚═════╝        ╚═╝ ╚════╝  ╚════╝ ╚═════╝ \n"""
 
+    _RESET: Final[str] = "\x1b[0m"
+    _BOLD: Final[str] = HIGHLIGHT["Bold"]
+    _COLOR_DEFAULT: Final[str] = FG_COLORS_SEARCH["White"]
+    _COLOR_CUSTOM: Final[str] = FG_COLORS_SEARCH["Chartreuse1"]
+    _HEADER_CONTOUR: Final[str] = (
+        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╔══════════════════════════════════════════════════════════════════════╗{_RESET}\n"
+    )
+    _FOOTER_CONTOUR: Final[str] = (
+        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╚══════════════════════════════════════════════════════════════════════╝{_RESET}\n\n"
+    )
+    _SIDE_CONTOUR: Final[str] = f"{_RESET}{_COLOR_CUSTOM}║{_RESET}"
+    _HEADER: Final[str] = (
+        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╭─────────────────┬───────── Parse IPM ────────────────────────────╮{_RESET}"
+    )
+    _FOOTER: Final[str] = (
+        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╰─────────────────┴────────────────────────────────────────────────╯{_RESET}"
+    )
+    _SIDE: Final[str] = f"{_RESET}{_COLOR_CUSTOM}│{_RESET}"
+    _ROW_CUSTOM_INIT: Final[str] = (
+        f"{_SIDE_CONTOUR} {_SIDE}{_RESET}{_BOLD}{_COLOR_DEFAULT}"
+    )
+    _ROW_CUSTOM_END: Final[str] = f"{_RESET}{_SIDE} {_SIDE_CONTOUR}"
+
     def __init__(self) -> None:
         super().__init__()
 
         self._file_info: Optional[TupleManagerFile] = None
         self._len_raw: int = 0
+        self._file_date: Optional[str] = None
+        self._cycle: Optional[str] = None
 
         print_custom_text(
             text=self._TITLE,
             highlight=["Bold"],
-            color_foreground="IndianRed1_2",
+            color_foreground="Chartreuse1",
         )
 
     def _extract_iso_payload(
@@ -107,42 +139,36 @@ class MastercardIso8583Parse(FilesDataLogging):
 
     def _logging(self, file_name: str, row_count: int, data: TypeIpm) -> None:
 
-        RESET: str = "\033[0m"
-        BOLD: str = "\033[1m"
-        COLOR_DEFAULT: str = "\033[38;5;15m"
-        COLOR_ORANGE: str = "\033[38;5;204m"
-
-        date_format: str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         row_count_format: str = f"{row_count:,}".replace(",", ".")
-        header_contour: str = f"{RESET}{BOLD}{COLOR_ORANGE}╔═══════════════════════════════════════════════════════════════════╗{RESET}\n"
-        footer_contour: str = f"{RESET}{BOLD}{COLOR_ORANGE}╚═══════════════════════════════════════════════════════════════════╝{RESET}\n\n"
-        side_contour: str = f"{RESET}{COLOR_ORANGE}║{RESET}"
-        header: str = f"{RESET}{BOLD}{COLOR_ORANGE}╭──────────────┬─────────── Parse IPM ──────────────────────────╮{RESET}"
-        footer: str = f"{RESET}{BOLD}{COLOR_ORANGE}╰──────────────┴────────────────────────────────────────────────╯{RESET}"
-        side: str = f"{RESET}{COLOR_ORANGE}│{RESET}"
 
         rows: List[str] = [
-            f" ⏳ Date Time {side} {date_format}",
-            f" 📄 File Name {side} {file_name}",
-            f" 📁 File Size {side} {self._len_raw / (1024**2):.2f} MB",
-            f" 🔢 Row Count {side} {row_count_format}",
-        ]
-        space: List[str] = [
-            f"{' ' * (len(header) - len(rows[0]) - 7)}",
-            f"{' ' * (len(header) - len(rows[1]) - 7)}",
-            f"{' ' * (len(header) - len(rows[2]) - 7)}",
-            f"{' ' * (len(header) - len(rows[3]) - 7)}",
+            f" ◉ 📄 File Name  {self._SIDE} {file_name}",
+            f" ◉ ⏳ File Date  {self._SIDE} {format_date(file_name=file_name)}",
+            f" ◉ 📄 File Cycle {self._SIDE} {self._cycle}",
+            f" ◉ 📄 File Size  {self._SIDE} {format_size(self._len_raw)}",
+            f" ◉ 🔢 File Row   {self._SIDE} {row_count_format}",
         ]
 
-        body: str = (
-            f"    {header_contour}"
-            f"    {side_contour} {header} {side_contour}\n"
-            f"    {side_contour} {side}{RESET}{COLOR_DEFAULT}{rows[0] + space[0]}{RESET}{side} {side_contour}\n"
-            f"    {side_contour} {side}{RESET}{COLOR_DEFAULT}{rows[1] + space[1]}{RESET}{side} {side_contour}\n"
-            f"    {side_contour} {side}{RESET}{COLOR_DEFAULT}{rows[2] + space[2]}{RESET}{side} {side_contour}\n"
-            f"    {side_contour} {side}{RESET}{COLOR_DEFAULT}{rows[3] + space[3]}{RESET}{side} {side_contour}\n"
-            f"    {side_contour} {footer} {side_contour}\n"
-            f"    {footer_contour}"
+        body: str = ""
+
+        for idx, row in enumerate(rows):
+            space = format_space(text1=self._HEADER, text2=row)
+
+            if not idx:
+                body = (
+                    f"    {self._HEADER_CONTOUR}"
+                    f"    {self._SIDE_CONTOUR} {self._HEADER} {self._SIDE_CONTOUR}\n"
+                    f"    {self._ROW_CUSTOM_INIT}{row + space}{self._ROW_CUSTOM_END}\n"
+                )
+
+            if idx:
+                body += (
+                    f"    {self._ROW_CUSTOM_INIT}{row + space}{self._ROW_CUSTOM_END}\n"
+                )
+
+        body += (
+            f"    {self._SIDE_CONTOUR} {self._FOOTER} {self._SIDE_CONTOUR}\n"
+            f"    {self._FOOTER_CONTOUR}"
         )
 
         self.logging_file(data=data, file_name=file_name, type_logg=["csv", "txt"])
@@ -151,10 +177,11 @@ class MastercardIso8583Parse(FilesDataLogging):
 
         return None
 
-    def search_ipm(self, date_file: str, cycle: TypeCycleIpm) -> None:
+    def search_ipm(self, file_date: str, cycle: TypeCycleIpm) -> None:
 
+        self._file_date, self._cycle = file_date, cycle
         self._file_infos: Optional[TupleManagerFile] = file_search(
-            file_date=date_file, cycle=cycle
+            file_date=file_date, cycle=cycle
         )
 
     def parse_ipm(
@@ -196,7 +223,7 @@ class MastercardIso8583Parse(FilesDataLogging):
 
 if __name__ == "__main__":
     master = MastercardIso8583Parse()
-    file = master.search_ipm(date_file="01/04/2026", cycle="CIC2")
+    file = master.search_ipm(file_date="01/04/2026", cycle="CIC2")
     parse = master.parse_ipm()
     count = 0
     if parse:

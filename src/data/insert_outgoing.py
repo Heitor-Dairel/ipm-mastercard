@@ -9,7 +9,12 @@ from psycopg.rows import TupleRow
 from rich import print
 
 from ..core import MastercardIso8583Parse
-from ..models import TypeCycleIpm, TypeIpmDb, TypeParseIpmDb
+from ..models import (
+    TypeCycleIpm,
+    TypeIpmDb,
+    TypeParseIpmDb,
+)
+from ..utils import print_custom_text
 
 load_dotenv()
 
@@ -82,11 +87,11 @@ class DbOutgouing:
 
         file_name_split: List[str] = file_name.split("_")
 
-        date_reference: str = datetime.strptime(file_name_split[-2], "%d%m%Y").strftime(
+        reference_date: str = datetime.strptime(file_name_split[-2], "%d%m%Y").strftime(
             "%d/%m/%Y"
         )
 
-        return date_reference
+        return reference_date
 
     def iso_db(
         self,
@@ -98,7 +103,7 @@ class DbOutgouing:
         file_name: Optional[str] = None
         date_reference: Optional[str] = None
         arq_parse: Optional[List[List[TypeIpmDb]]] = None
-        self._parse.search_ipm(date_file=date_file, cycle=cycle)
+        self._parse.search_ipm(file_date=date_file, cycle=cycle)
 
         parse: TypeParseIpmDb = self._parse.parse_ipm_db(logging=logging)
 
@@ -127,8 +132,27 @@ class DbOutgouing:
 
             self._conn.close()
 
-            print(f"O arquivo {file_name}, já foi inserido no banco.")
+            rows: List[str] = ["📄 File ", " already in DB."]
 
+            print_custom_text(
+                "    ◉ ",
+                color_foreground="White",
+                end="",
+            )
+
+            for idx, row in enumerate(rows):
+                print_custom_text(
+                    row,
+                    color_foreground="Chartreuse1",
+                    end="",
+                )
+                if not idx:
+                    print_custom_text(
+                        f"'{file_name}'",
+                        color_foreground="White",
+                        end="",
+                    )
+            print("\n")
             return True
 
         return False
@@ -162,11 +186,34 @@ class DbOutgouing:
             self._cur.close()
             self._conn.close()
 
-            qtd_rows_insert: str = f"{len(arq_parse):,}".replace(",", ".")
+            row_count_insert: str = f"{len(arq_parse):,}".replace(",", ".")
 
-            print(
-                f"{qtd_rows_insert} de linhas do arquivo {file_name}, foram inseridas com sucesso na tabela TB_MASTER_ARQUIVO_DETALHADO."
+            rows: List[str] = ["🗂️ Inserted ", " rows into database (from ", ")."]
+
+            print_custom_text(
+                "    ◉ ",
+                color_foreground="White",
+                end="",
             )
+            for idx, row in enumerate(rows):
+                print_custom_text(
+                    row,
+                    color_foreground="Chartreuse1",
+                    end="",
+                )
+                if not idx:
+                    print_custom_text(
+                        row_count_insert,
+                        color_foreground="White",
+                        end="",
+                    )
+                if idx == len(rows) - 2:
+                    print_custom_text(
+                        f"'{file_name}'",
+                        color_foreground="White",
+                        end="",
+                    )
+            print("\n")
 
         except Exception as e:
             self._conn.rollback()
