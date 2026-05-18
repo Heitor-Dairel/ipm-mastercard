@@ -5,7 +5,7 @@ from starkbank import iso8583
 from term_image.image import BaseImage, from_file
 
 from ..helpers import (
-    FilesDataLogging,
+    DataLogging,
     file_search,
     format_date,
     format_size,
@@ -28,7 +28,7 @@ from ..utils import BeautifyIpmDb, print_custom_text
 class ISO8583ParseError(Exception): ...
 
 
-class MastercardIso8583Parse(FilesDataLogging):
+class MC8583(DataLogging):
     _TITLE: Final[str] = pyfiglet.figlet_format(
         " MASTERCARD PARSE\n", font="ansi_shadow", width=200
     ) + pyfiglet.figlet_format(" ISO 8583-1993", font="ansi_shadow", width=200)
@@ -52,7 +52,7 @@ class MastercardIso8583Parse(FilesDataLogging):
     _FOOTER: Final[str] = (
         f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╰─────────────────┴────────────────────────────────────────────────╯{_RESET}"
     )
-    _SIDE: Final[str] = f"{_RESET}{_COLOR_CUSTOM}│{_RESET}"
+    _SIDE: Final[str] = f"{_RESET}{_COLOR_CUSTOM}│{_RESET}{_BOLD}{_COLOR_DEFAULT}"
     _ROW_CUSTOM_INIT: Final[str] = (
         f"{_SIDE_CONTOUR} {_SIDE}{_RESET}{_BOLD}{_COLOR_DEFAULT}"
     )
@@ -67,8 +67,7 @@ class MastercardIso8583Parse(FilesDataLogging):
         self._cycle: Optional[str] = None
 
         img: BaseImage = from_file(filepath=self._PATH)
-        img.set_size(width=20)
-        img.set_size(height=10)
+        img.set_size(width=30, height=10)
         print(str(img).rstrip(), end="\n")
 
         print_custom_text(
@@ -219,7 +218,7 @@ class MastercardIso8583Parse(FilesDataLogging):
 
 
 if __name__ == "__main__":
-    master = MastercardIso8583Parse()
+    master = MC8583()
     file = master.search_ipm(file_date="01/04/2026", cycle="CIC2")
     parse = master.parse_ipm()
     count = 0

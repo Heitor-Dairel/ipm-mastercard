@@ -1,3 +1,3 @@
-from .iso import MastercardIso8583Parse
+from .iso import MC8583
 
-__all__ = ["MastercardIso8583Parse"]
+__all__ = ["MC8583"]

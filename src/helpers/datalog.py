@@ -9,7 +9,7 @@ from polars import DataFrame
 from ..models import TypeIpm
 
 
-class FilesDataLogging:
+class DataLogging:
     def __init__(self) -> None:
         self._output_path_abs: Path = self._output_path()
 
@@ -52,7 +52,11 @@ class FilesDataLogging:
 
         df: DataFrame = pl.DataFrame(data=data_csv).unnest("PDS")
 
-        df.write_csv(self._output_path_abs / f"{file_name}.csv")
+        df.write_csv(
+            self._output_path_abs / f"{file_name}.csv",
+            separator=";",
+            decimal_comma=True,
+        )
 
         return None
 

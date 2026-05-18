@@ -21,7 +21,7 @@ def format_date(file_name: str) -> str:
 
 def format_space(text1: str, text2: str) -> str:
 
-    return " " * (len(text1) - len(text2) - 7)
+    return " " * (len(text1) - len(text2) + 7)
 
 
 if __name__ == "__main__":

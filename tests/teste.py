@@ -1,15 +1,15 @@
 import timeit
 
-from src.core import MastercardIso8583Parse
+from src.core import MC8583
 
-file = MastercardIso8583Parse()
+master = MC8583()
 
-raw = file.file_contents(date_file="26/05/2025", cycle="CIC2")
+master.search_ipm(file_date="26/05/2025", cycle="CIC2")
 
 
 def fun_to_teste():
 
-    _, _ = file.parse_ipm(raw=raw)
+    _ = master.parse_ipm()
 
 
 time_exec = 6

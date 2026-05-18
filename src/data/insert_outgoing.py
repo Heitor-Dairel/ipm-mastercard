@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple
 
 import psycopg
 from dotenv import load_dotenv
@@ -8,7 +8,7 @@ from psycopg import Connection, ServerCursor
 from psycopg.rows import TupleRow
 from rich import print
 
-from ..core import MastercardIso8583Parse
+from ..core import MC8583
 from ..models import (
     TypeCycleIpm,
     TypeIpmDb,
@@ -81,7 +81,7 @@ class DbOutgouing:
             password=password,
         )
         self._cur: ServerCursor[TupleRow] = self._conn.cursor()
-        self._parse: MastercardIso8583Parse = MastercardIso8583Parse()
+        self._parse: MC8583 = MC8583()
 
     def _date_reference_file(self, file_name: str) -> str:
 
@@ -123,6 +123,60 @@ class DbOutgouing:
 
         return None
 
+    def __logging(
+        self, data: Dict[str, str], model: Literal["insert", "select"]
+    ) -> None:
+
+        rows_insert: List[str] = ["🗂️ Inserted ", " rows into database (from ", ")."]
+        rows_select: List[str] = ["📄 File ", " already in DB."]
+
+        if model == "select":
+            print_custom_text(
+                "    ◉ ",
+                color_foreground="White",
+                end="",
+            )
+
+            for idx, row in enumerate(rows_select):
+                print_custom_text(
+                    row,
+                    color_foreground="Red",
+                    end="",
+                )
+                if not idx:
+                    print_custom_text(
+                        f"'{data['file_name']}'",
+                        color_foreground="White",
+                        end="",
+                    )
+            print("\n\n")
+
+        if model == "insert":
+            print_custom_text(
+                "    ◉ ",
+                color_foreground="White",
+                end="",
+            )
+            for idx, row in enumerate(rows_insert):
+                print_custom_text(
+                    row,
+                    color_foreground="Red",
+                    end="",
+                )
+                if not idx:
+                    print_custom_text(
+                        data["row_count_insert"],
+                        color_foreground="White",
+                        end="",
+                    )
+                if idx == len(rows_insert) - 2:
+                    print_custom_text(
+                        f"'{data['file_name']}'",
+                        color_foreground="White",
+                        end="",
+                    )
+            print("\n\n")
+
     def _exists_file_master(self, file_name: str) -> bool:
 
         cur_result = self._cur.execute(self._EXISTS_FILE, (file_name,))
@@ -132,27 +186,8 @@ class DbOutgouing:
 
             self._conn.close()
 
-            rows: List[str] = ["📄 File ", " already in DB."]
+            self.__logging(data={"file_name": file_name}, model="select")
 
-            print_custom_text(
-                "    ◉ ",
-                color_foreground="White",
-                end="",
-            )
-
-            for idx, row in enumerate(rows):
-                print_custom_text(
-                    row,
-                    color_foreground="Red",
-                    end="",
-                )
-                if not idx:
-                    print_custom_text(
-                        f"'{file_name}'",
-                        color_foreground="White",
-                        end="",
-                    )
-            print("\n")
             return True
 
         return False
@@ -188,32 +223,10 @@ class DbOutgouing:
 
             row_count_insert: str = f"{len(arq_parse):,}".replace(",", ".")
 
-            rows: List[str] = ["🗂️ Inserted ", " rows into database (from ", ")."]
-
-            print_custom_text(
-                "    ◉ ",
-                color_foreground="White",
-                end="",
+            self.__logging(
+                data={"file_name": file_name, "row_count_insert": row_count_insert},
+                model="select",
             )
-            for idx, row in enumerate(rows):
-                print_custom_text(
-                    row,
-                    color_foreground="Red",
-                    end="",
-                )
-                if not idx:
-                    print_custom_text(
-                        row_count_insert,
-                        color_foreground="White",
-                        end="",
-                    )
-                if idx == len(rows) - 2:
-                    print_custom_text(
-                        f"'{file_name}'",
-                        color_foreground="White",
-                        end="",
-                    )
-            print("\n")
 
         except Exception as e:
             self._conn.rollback()
