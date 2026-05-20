@@ -1,4 +1,5 @@
-from .message import BeautifyIpmDb, iso_parse
+from .message import BeautifyIpmDb
 from .print_color import print_custom_text
+from .version import IsoVersion
 
-__all__ = ["print_custom_text", "BeautifyIpmDb", "iso_parse"]
+__all__ = ["print_custom_text", "BeautifyIpmDb", "IsoVersion"]

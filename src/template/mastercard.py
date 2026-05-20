@@ -1,5 +1,5 @@
 from binascii import unhexlify
-from typing import Dict, Final, Tuple
+from typing import Dict, Tuple
 
 from starkbank.iso8583.template.base import Template
 from starkbank.iso8583.utils.field import Field
@@ -18,12 +18,8 @@ from ..template.parse import (
     ParseInteger,
     ParseStringDb,
 )
+from ..utils import IsoVersion
 from .base import FieldDb, TemplateDb
-
-
-class IsoVersion:
-    VERSION_1987: Final[str] = "1987"
-    VERSION_1993: Final[str] = "1993"
 
 
 class ParseHexadecimal:
@@ -40,7 +36,7 @@ class ParseHexadecimal:
 
 
 mastercard: Dict[str, Template] = {
-    IsoVersion.VERSION_1987: Template(
+    IsoVersion.ISO1987: Template(
         headerRule=NoHeaderRule(),
         fields=[
             Field(
@@ -695,7 +691,7 @@ mastercard: Dict[str, Template] = {
             ),
         ],
     ),
-    IsoVersion.VERSION_1993: Template(
+    IsoVersion.ISO1993: Template(
         headerRule=NoHeaderRule(),
         fields=[
             Field(
