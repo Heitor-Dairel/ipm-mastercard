@@ -13,7 +13,12 @@ from starkbank.iso8583.utils.parser import (
     ParseString,
 )
 
-from ..utils import ParseDate, ParseField, ParseInteger, ParseStringDb, TemplateDb
+from ..template.parse import (
+    ParseDate,
+    ParseInteger,
+    ParseStringDb,
+)
+from .base import FieldDb, TemplateDb
 
 
 class IsoVersion:
@@ -1349,37 +1354,37 @@ mastercard: Dict[str, Template] = {
 
 mastercard_db: TemplateDb = TemplateDb(
     fields=[
-        ParseField(name="MTI", parse=ParseStringDb()),
-        ParseField(name="DE002", parse=ParseStringDb()),
-        ParseField(name="DE003", parse=ParseStringDb()),
-        ParseField(name="DE004", parse=ParseInteger()),
-        ParseField(name="DE012", parse=ParseDate()),
-        ParseField(name="DE014", parse=ParseDate()),
-        ParseField(name="DE022", parse=ParseStringDb()),
-        ParseField(name="DE023", parse=ParseStringDb()),
-        ParseField(name="DE024", parse=ParseStringDb()),
-        ParseField(name="DE025", parse=ParseStringDb()),
-        ParseField(name="DE026", parse=ParseInteger()),
-        ParseField(name="DE031", parse=ParseStringDb()),
-        ParseField(name="DE033", parse=ParseStringDb()),
-        ParseField(name="DE038", parse=ParseStringDb()),
-        ParseField(name="DE040", parse=ParseStringDb()),
-        ParseField(name="DE041", parse=ParseStringDb()),
-        ParseField(name="DE042", parse=ParseStringDb()),
-        ParseField(name="DE043", parse=ParseStringDb()),
-        ParseField(name="DE049", parse=ParseStringDb()),
-        ParseField(name="DE063", parse=ParseStringDb()),
-        ParseField(name="DE093", parse=ParseStringDb()),
-        ParseField(name="DE094", parse=ParseStringDb()),
-        ParseField(name="PDS0023", parse=ParseStringDb()),
-        ParseField(name="PDS0052", parse=ParseStringDb()),
-        ParseField(name="PDS0148", parse=ParseStringDb()),
-        ParseField(name="PDS0158", parse=ParseStringDb()),
-        ParseField(name="PDS0165", parse=ParseStringDb()),
-        ParseField(name="PDS0170", parse=ParseStringDb()),
-        ParseField(name="PDS0220", parse=ParseStringDb()),
-        ParseField(name="PDS0375", parse=ParseStringDb()),
-        ParseField(name="DE063", parse=ParseStringDb(), custom=True),
-        ParseField(name="PDS0158", parse=ParseStringDb(), custom=True),
+        FieldDb(name="MTI", parse=ParseStringDb()),
+        FieldDb(name="DE002", parse=ParseStringDb()),
+        FieldDb(name="DE003", parse=ParseStringDb()),
+        FieldDb(name="DE004", parse=ParseInteger()),
+        FieldDb(name="DE012", parse=ParseDate()),
+        FieldDb(name="DE014", parse=ParseDate()),
+        FieldDb(name="DE022", parse=ParseStringDb()),
+        FieldDb(name="DE023", parse=ParseStringDb()),
+        FieldDb(name="DE024", parse=ParseStringDb()),
+        FieldDb(name="DE025", parse=ParseStringDb()),
+        FieldDb(name="DE026", parse=ParseInteger()),
+        FieldDb(name="DE031", parse=ParseStringDb()),
+        FieldDb(name="DE033", parse=ParseStringDb()),
+        FieldDb(name="DE038", parse=ParseStringDb()),
+        FieldDb(name="DE040", parse=ParseStringDb()),
+        FieldDb(name="DE041", parse=ParseStringDb()),
+        FieldDb(name="DE042", parse=ParseStringDb()),
+        FieldDb(name="DE043", parse=ParseStringDb()),
+        FieldDb(name="DE049", parse=ParseStringDb()),
+        FieldDb(name="DE063", parse=ParseStringDb()),
+        FieldDb(name="DE093", parse=ParseStringDb()),
+        FieldDb(name="DE094", parse=ParseStringDb()),
+        FieldDb(name="PDS0023", parse=ParseStringDb()),
+        FieldDb(name="PDS0052", parse=ParseStringDb()),
+        FieldDb(name="PDS0148", parse=ParseStringDb()),
+        FieldDb(name="PDS0158", parse=ParseStringDb()),
+        FieldDb(name="PDS0165", parse=ParseStringDb()),
+        FieldDb(name="PDS0170", parse=ParseStringDb()),
+        FieldDb(name="PDS0220", parse=ParseStringDb()),
+        FieldDb(name="PDS0375", parse=ParseStringDb()),
+        FieldDb(name="DE063", parse=ParseStringDb(), custom=True),
+        FieldDb(name="PDS0158", parse=ParseStringDb(), custom=True),
     ]
 )

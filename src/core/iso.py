@@ -213,7 +213,7 @@ class MC8583(DataLogging):
                 template=mastercard_db, elements=parse_ipm
             )
 
-            parse_db: List[List[TypeIpmDb]] = ipm_db.parse()
+            parse_db: List[List[TypeIpmDb]] = ipm_db.iso_parse()
 
             return parse_db, file_name
 
