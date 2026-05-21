@@ -12,8 +12,7 @@ from ..helpers import (
     format_space,
 )
 from ..models import (
-    FG_COLORS_SEARCH,
-    HIGHLIGHT,
+    CompMC8583,
     TupleManagerFile,
     TypeCycleIpm,
     TypeIpm,
@@ -21,7 +20,7 @@ from ..models import (
     TypeParseIpm,
     TypeParseIpmDb,
 )
-from ..template import mastercard, mastercard_db
+from ..template import custom_mastercard, mastercard_db
 from ..utils import BeautifyIpmDb, print_custom_text
 
 
@@ -34,32 +33,6 @@ class MC8583(DataLogging):
     ) + pyfiglet.figlet_format(" ISO 8583-1993", font="ansi_shadow", width=200)
 
     _PATH: str = r"src\img\mastercard_logo.png"
-
-    _RESET: Final[str] = "\x1b[0m"
-    _BOLD: Final[str] = HIGHLIGHT["Bold"]
-    _COLOR_DEFAULT: Final[str] = FG_COLORS_SEARCH["White"]
-    _COLOR_CUSTOM: Final[str] = FG_COLORS_SEARCH["Red"]
-    _PARTING: Final[str] = (
-        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}══════════════════════════════════ ◆ ═══════════════════════════════════{_RESET}\n"
-    )
-    _HEADER_CONTOUR: Final[str] = (
-        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╔══════════════════════════════════════════════════════════════════════╗{_RESET}\n"
-    )
-    _FOOTER_CONTOUR: Final[str] = (
-        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╚══════════════════════════════════════════════════════════════════════╝{_RESET}\n\n"
-    )
-    _SIDE_CONTOUR: Final[str] = f"{_RESET}{_COLOR_CUSTOM}║{_RESET}"
-    _HEADER: Final[str] = (
-        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╭─────────────────┬───────── Parse IPM ────────────────────────────╮{_RESET}"
-    )
-    _FOOTER: Final[str] = (
-        f"{_RESET}{_BOLD}{_COLOR_CUSTOM}╰─────────────────┴────────────────────────────────────────────────╯{_RESET}"
-    )
-    _SIDE: Final[str] = f"{_RESET}{_COLOR_CUSTOM}│{_RESET}{_BOLD}{_COLOR_DEFAULT}"
-    _ROW_CUSTOM_INIT: Final[str] = (
-        f"{_SIDE_CONTOUR} {_SIDE}{_RESET}{_BOLD}{_COLOR_DEFAULT}"
-    )
-    _ROW_CUSTOM_END: Final[str] = f"{_RESET}{_SIDE} {_SIDE_CONTOUR}"
 
     def __init__(self) -> None:
         super().__init__()
@@ -123,7 +96,7 @@ class MC8583(DataLogging):
                 index += consumed
 
                 message_parser: Dict[str, Any] = iso8583.parse(
-                    message=payload, template=mastercard, encoding="cp500"
+                    message=payload, template=custom_mastercard, encoding="cp500"
                 )
 
                 append_mti(message_parser)
@@ -139,35 +112,33 @@ class MC8583(DataLogging):
     def _logging(self, file_name: str, row_count: int, data: TypeIpm) -> None:
 
         row_count_format: str = f"{row_count:,}".replace(",", ".")
-
+        space: Optional[str] = None
         rows: List[str] = [
-            f" ◉ 📄 File Name  {self._SIDE} {file_name}",
-            f" ◉ 📄 File Date  {self._SIDE} {format_date(file_name=file_name)}",
-            f" ◉ 📄 File Cycle {self._SIDE} {self._cycle}",
-            f" ◉ 📄 File Size  {self._SIDE} {format_size(self._len_raw)}",
-            f" ◉ 📄 File Row   {self._SIDE} {row_count_format}",
+            f" ◉ 📄 File Name  {CompMC8583.SIDE} {file_name}",
+            f" ◉ 📄 File Date  {CompMC8583.SIDE} {format_date(file_name=file_name)}",
+            f" ◉ 📄 File Cycle {CompMC8583.SIDE} {self._cycle}",
+            f" ◉ 📄 File Size  {CompMC8583.SIDE} {format_size(self._len_raw)}",
+            f" ◉ 📄 File Row   {CompMC8583.SIDE} {row_count_format}",
         ]
 
-        body: str = f"    {self._PARTING}\n"
+        body: str = f"    {CompMC8583.PARTING}\n"
 
         for idx, row in enumerate(rows):
-            space = format_space(text1=self._HEADER, text2=row)
+            space = format_space(text1=CompMC8583.HEADER, text2=row)
 
             if not idx:
                 body += (
-                    f"    {self._HEADER_CONTOUR}"
-                    f"    {self._SIDE_CONTOUR} {self._HEADER} {self._SIDE_CONTOUR}\n"
-                    f"    {self._ROW_CUSTOM_INIT}{row + space}{self._ROW_CUSTOM_END}\n"
+                    f"    {CompMC8583.HEADER_CONTOUR}"
+                    f"    {CompMC8583.SIDE_CONTOUR} {CompMC8583.HEADER} {CompMC8583.SIDE_CONTOUR}\n"
+                    f"    {CompMC8583.ROW_CUSTOM_INIT}{row + space}{CompMC8583.ROW_CUSTOM_END}\n"
                 )
 
             if idx:
-                body += (
-                    f"    {self._ROW_CUSTOM_INIT}{row + space}{self._ROW_CUSTOM_END}\n"
-                )
+                body += f"    {CompMC8583.ROW_CUSTOM_INIT}{row + space}{CompMC8583.ROW_CUSTOM_END}\n"
 
         body += (
-            f"    {self._SIDE_CONTOUR} {self._FOOTER} {self._SIDE_CONTOUR}\n"
-            f"    {self._FOOTER_CONTOUR}"
+            f"    {CompMC8583.SIDE_CONTOUR} {CompMC8583.FOOTER} {CompMC8583.SIDE_CONTOUR}\n"
+            f"    {CompMC8583.FOOTER_CONTOUR}"
         )
 
         self.logging_file(data=data, file_name=file_name, type_logg=["csv", "txt"])
@@ -188,6 +159,10 @@ class MC8583(DataLogging):
         logging: bool = True,
     ) -> TypeParseIpm:
 
+        file_name: Optional[str] = None
+        bytes_file: Optional[memoryview] = None
+        parse_ipm: Optional[TypeIpm] = None
+        msg_count: Optional[int] = None
         if self._file_infos:
             file_name, bytes_file = self._file_infos
             parse_ipm, msg_count = self._playload_ipm_file(raw=bytes_file)
@@ -203,6 +178,11 @@ class MC8583(DataLogging):
         logging: bool = True,
     ) -> TypeParseIpmDb:
 
+        file_name: Optional[str] = None
+        bytes_file: Optional[memoryview] = None
+        parse_ipm: Optional[TypeIpm] = None
+        msg_count: Optional[int] = None
+
         if self._file_infos:
             file_name, bytes_file = self._file_infos
             parse_ipm, msg_count = self._playload_ipm_file(raw=bytes_file)
@@ -213,7 +193,7 @@ class MC8583(DataLogging):
                 template=mastercard_db, elements=parse_ipm
             )
 
-            parse_db: List[List[TypeIpmDb]] = ipm_db.iso_parse()
+            parse_db: List[List[TypeIpmDb]] = ipm_db.parse()
 
             return parse_db, file_name
 

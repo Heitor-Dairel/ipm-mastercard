@@ -1,10 +1,37 @@
-from typing import Any, Dict, List, Literal, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, Final, List, Literal, NamedTuple, Optional, Tuple, Union
 
 type TypeIpmDb = Optional[Union[int, str, float]]
 type TypeIpm = List[Dict[str, Any]]
 type TypeParseIpm = Optional[Tuple[TypeIpm, str]]
 type TypeCycleIpm = Literal["CIC1", "CIC2", "CIC3"]
 type TypeParseIpmDb = Optional[Tuple[List[List[TypeIpmDb]], str]]
+type TypeElementsIpm = List[List[str]]
+
+
+class CompMC8583:
+    RESET: Final[str] = "\x1b[0m"
+    BOLD: Final[str] = "\x1b[1m"
+    COLOR_DEFAULT: Final[str] = "\x1b[38;5;15m"
+    COLOR_CUSTOM: Final[str] = "\x1b[38;5;9m"
+    PARTING: Final[str] = (
+        f"{RESET}{BOLD}{COLOR_CUSTOM}══════════════════════════════════ ◆ ═══════════════════════════════════{RESET}\n"
+    )
+    HEADER_CONTOUR: Final[str] = (
+        f"{RESET}{BOLD}{COLOR_CUSTOM}╔══════════════════════════════════════════════════════════════════════╗{RESET}\n"
+    )
+    FOOTER_CONTOUR: Final[str] = (
+        f"{RESET}{BOLD}{COLOR_CUSTOM}╚══════════════════════════════════════════════════════════════════════╝{RESET}\n\n"
+    )
+    SIDE_CONTOUR: Final[str] = f"{RESET}{COLOR_CUSTOM}║{RESET}"
+    HEADER: Final[str] = (
+        f"{RESET}{BOLD}{COLOR_CUSTOM}╭─────────────────┬───────── Parse IPM ────────────────────────────╮{RESET}"
+    )
+    FOOTER: Final[str] = (
+        f"{RESET}{BOLD}{COLOR_CUSTOM}╰─────────────────┴────────────────────────────────────────────────╯{RESET}"
+    )
+    SIDE: Final[str] = f"{RESET}{COLOR_CUSTOM}│{RESET}{BOLD}{COLOR_DEFAULT}"
+    ROW_CUSTOM_INIT: Final[str] = f"{SIDE_CONTOUR} {SIDE}{RESET}{BOLD}{COLOR_DEFAULT}"
+    ROW_CUSTOM_END: Final[str] = f"{RESET}{SIDE} {SIDE_CONTOUR}"
 
 
 class TupleManagerFile(NamedTuple):

@@ -1,8 +1,9 @@
+from binascii import unhexlify
 from datetime import datetime
-from typing import Union
+from typing import Tuple, Union
 
 
-class ParseInteger:
+class ParseIntegerDb:
     def __init__(self) -> None: ...
 
     def field(self, data_element: str, name: str) -> Union[int, float]:
@@ -25,7 +26,7 @@ class ParseStringDb:
         return data_element
 
 
-class ParseDate:
+class ParseDateDb:
     def __init__(self) -> None: ...
 
     def field(self, data_element: str, name: str) -> str:
@@ -36,3 +37,16 @@ class ParseDate:
             )
 
         return datetime.strptime(data_element, "%y%m").strftime("%y/%m")
+
+
+class ParseHexadecimal:
+    def parse(self, data: bytes, length: int, encoding: str) -> str:
+        return data.hex().upper()
+
+    def unparse(self, value: str, encoding: str) -> Tuple[bytes, int]:
+        data: bytes = unhexlify(value)
+        logicalLength: int = len(data)
+        return data, logicalLength
+
+    def byteLength(self, length: int) -> int:
+        return length

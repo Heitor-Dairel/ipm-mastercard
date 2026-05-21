@@ -127,9 +127,9 @@ class DB8583:
     def close(
         self,
     ) -> None:
-
+        exec: Optional[List[Callable[[], None]]] = None
         if self._conn and self._cur:
-            exec: List[Callable[[], None]] = [
+            exec = [
                 self._conn.commit,
                 self._cur.close,
                 self._conn.close,
@@ -229,6 +229,8 @@ class DB8583:
         date_reference: str,
     ) -> bool:
 
+        cur_result: Optional[ServerCursor] = None
+
         if self._conn and self._cur:
             cur_result = self._cur.execute(self._EXISTS_FILE, (date_reference, cycle))
             if cur_result.fetchone():
@@ -245,6 +247,9 @@ class DB8583:
     ) -> None:
 
         arq_parse = parse
+        row_id: Optional[Tuple[int]] = None
+        new_id: Optional[int] = None
+        row_count_insert: Optional[str] = None
 
         if self._conn and self._cur:
             try:
@@ -254,7 +259,7 @@ class DB8583:
                     returning=True,
                 )
 
-                row_id: Optional[Tuple[int]] = self._cur.fetchone()
+                row_id = self._cur.fetchone()
                 new_id = row_id[0] if row_id else 0
 
                 with self._cur.copy(DB8583._COPY_SQL) as copy:
@@ -262,7 +267,7 @@ class DB8583:
                         row.append(new_id)
                         copy.write_row(row)
 
-                row_count_insert: str = f"{len(arq_parse):,}".replace(",", ".")
+                row_count_insert = f"{len(arq_parse):,}".replace(",", ".")
 
                 self.__logging(
                     data={"file_name": file_name, "row_count_insert": row_count_insert},

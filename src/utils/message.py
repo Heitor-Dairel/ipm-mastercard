@@ -1,11 +1,11 @@
 from typing import Any, Dict, Final, List, Optional
 
-from ..models import TypeIpm, TypeIpmDb
+from ..models import TypeElementsIpm, TypeIpm, TypeIpmDb
 from ..template import FieldDb, TemplateDb
 
 
 class BeautifyIpmDb:
-    _DATA_ELEMENTS_MESSAGE: Final[List[List[str]]] = [
+    _DATA_ELEMENTS_MESSAGE: Final[TypeElementsIpm] = [
         ["MTI", "DE"],
         ["DE002", "DE"],
         ["DE003", "DE"],
@@ -44,7 +44,7 @@ class BeautifyIpmDb:
         self.elements: TypeIpm = elements
         self.template = template
 
-    def iso_parse(
+    def parse(
         self,
     ) -> List[List[TypeIpmDb]]:
 
@@ -62,13 +62,16 @@ class BeautifyIpmDb:
         message: Dict[str, Any],
     ) -> List[TypeIpmDb]:
 
+        key: Optional[str] = None
+        value: Optional[str] = None
+        data_element: Optional[TypeIpmDb] = None
         parse_elements: List[TypeIpmDb] = []
         parse_elements_append = parse_elements.append
 
         for element in self._DATA_ELEMENTS_MESSAGE:
-            key: str = element[1]
-            value: str = element[0]
-            data_element: TypeIpmDb = self._get_element(
+            key = element[1]
+            value = element[0]
+            data_element = self._get_element(
                 message=message, name=value, type_element=key
             )
 
@@ -84,6 +87,7 @@ class BeautifyIpmDb:
     ) -> TypeIpmDb:
 
         data_element: Optional[str] = None
+        element_ipm: Optional[FieldDb] = None
 
         if type_element == "DE":
             data_element = message.get(name)
@@ -92,7 +96,7 @@ class BeautifyIpmDb:
             data_element = message[type_element].get(name)
 
         if data_element:
-            element_ipm: FieldDb = self.template.get_field(name=name)
+            element_ipm = self.template.get_field(name=name)
             return element_ipm.parsing(data_element=data_element.strip())
 
         return data_element

@@ -1,7 +1,7 @@
 import copy
 import json
 from pathlib import Path
-from typing import Any, Dict, Final, List, Literal
+from typing import Any, Dict, Final, List, Literal, Optional
 
 import polars as pl
 from polars import DataFrame
@@ -62,6 +62,7 @@ class DataLogging:
 
     def _logging_txt(self, data: TypeIpm, file_name: str) -> None:
 
+        json_dict: Optional[str] = None
         with open(
             self._output_path_abs / f"{file_name}.txt.log", "w", encoding="utf-8"
         ) as arquivo:
