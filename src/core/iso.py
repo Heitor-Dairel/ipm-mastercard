@@ -13,7 +13,7 @@ from ..helpers import (
 )
 from ..models import (
     CompMC8583,
-    TupleManagerFile,
+    TupleFileManager,
     TypeCycleIpm,
     TypeIpm,
     TypeIpmDb,
@@ -37,7 +37,7 @@ class MC8583(DataLogging):
     def __init__(self) -> None:
         super().__init__()
 
-        self._file_info: Optional[TupleManagerFile] = None
+        self._file_info: Optional[TupleFileManager] = None
         self._len_raw: int = 0
         self._file_date: Optional[str] = None
         self._cycle: Optional[str] = None
@@ -53,7 +53,7 @@ class MC8583(DataLogging):
     def search_ipm(self, file_date: str, cycle: TypeCycleIpm) -> None:
 
         self._file_date, self._cycle = file_date, cycle
-        self._file_infos: Optional[TupleManagerFile] = file_search(
+        self._file_infos: Optional[TupleFileManager] = file_search(
             file_date=file_date, cycle=cycle
         )
 

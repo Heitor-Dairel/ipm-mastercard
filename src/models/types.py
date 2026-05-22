@@ -34,9 +34,9 @@ class CompMC8583:
     ROW_CUSTOM_END: Final[str] = f"{RESET}{SIDE} {SIDE_CONTOUR}"
 
 
-class TupleManagerFile(NamedTuple):
+class TupleFileManager(NamedTuple):
     file_name: str
-    bytes_file: memoryview
+    file_bytes: memoryview
 
 
 HIGHLIGHT: Dict[str, str] = {

@@ -7,7 +7,7 @@ from typing import (
     Optional,
 )
 
-from ..models import TupleManagerFile, TypeCycleIpm
+from ..models import TupleFileManager, TypeCycleIpm
 
 _BASE_DIR: Final[Path] = Path(
     r"C:\Users\heitor.tavares\OneDrive - TRIVALE ADMINISTRACAO LTDA"
@@ -19,7 +19,7 @@ _FLAG_DIR: Final[str] = "(1)"
 class DateInvalidFormat(ValueError): ...
 
 
-def file_search(file_date: str, cycle: TypeCycleIpm) -> Optional[TupleManagerFile]:
+def file_search(file_date: str, cycle: TypeCycleIpm) -> Optional[TupleFileManager]:
 
     _validate_date(date=file_date)
 
@@ -28,8 +28,8 @@ def file_search(file_date: str, cycle: TypeCycleIpm) -> Optional[TupleManagerFil
         f"CSU_ACQ_MASTER_OUTGOING_{cycle}_{file_date_format}*.TXT"
     )
 
-    file: Generator[TupleManagerFile] = (
-        TupleManagerFile(file_name=arq.stem, bytes_file=_file_bytes(arq))
+    file: Generator[TupleFileManager] = (
+        TupleFileManager(file_name=arq.stem, file_bytes=_file_bytes(arq))
         for arq in files
         if _FLAG_DIR not in arq.parent.name
     )
