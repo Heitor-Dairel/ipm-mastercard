@@ -141,7 +141,7 @@ class MC8583(DataLogging):
         index: int = 0
         msg_count: int = 0
         mti_parse: TypeIpm = []
-        msg_parser: Dict[str, Any] = {}
+        msg_parse: Dict[str, Any] = {}
         extract_iso = self._extract_iso_payload
         append_mti = mti_parse.append
 
@@ -152,13 +152,13 @@ class MC8583(DataLogging):
                 )
                 index += consumed
 
-                msg_parser = iso8583.parse(
+                msg_parse = iso8583.parse(
                     message=payload, template=custom_mastercard, encoding="cp500"
                 )
 
-                append_mti(msg_parser)
+                append_mti(msg_parse)
 
-                msg_parser.clear()
+                msg_parse.clear()
 
                 msg_count += 1
 
