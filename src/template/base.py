@@ -6,7 +6,7 @@ from ..models import TypeIpmDb
 class FieldDb:
     def __init__(self, name: str, parse: object, custom: bool = False) -> None:
         self.name: str = name
-        self.parse = parse
+        self.parse: object = parse
         self.custom: bool = custom
 
         return None
