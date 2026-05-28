@@ -158,8 +158,6 @@ class MC8583(DataLogging):
 
                 append_mti(msg_parse)
 
-                msg_parse.clear()
-
                 msg_count += 1
 
         except Exception as e:
