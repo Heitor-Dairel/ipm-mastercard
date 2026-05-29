@@ -138,14 +138,14 @@ class DB8583:
     def iso_db(
         self,
         file_date: str,
-        cycle: TypeCycleIpm,
+        file_cycle: TypeCycleIpm,
         logging: bool = True,
     ) -> None:
 
         file_name: Optional[str] = None
         reference_date: Optional[str] = None
         arq_parse: Optional[List[List[TypeIpmDb]]] = None
-        self._parse.search_ipm(file_date=file_date, cycle=cycle)
+        self._parse.search_ipm(file_date=file_date, file_cycle=file_cycle)
 
         parse: TypeParseIpmDb = self._parse.parse_ipm_db(logging=logging)
 
@@ -158,7 +158,7 @@ class DB8583:
 
             self._transaction_db(
                 file_name=file_name,
-                cycle=cycle,
+                file_cycle=file_cycle,
                 reference_date=reference_date,
                 parse=arq_parse,
             )
@@ -234,7 +234,7 @@ class DB8583:
     def _exists_file_master(
         self,
         file_name: str,
-        cycle: str,
+        file_cycle: str,
         reference_date: str,
     ) -> bool:
 
@@ -242,7 +242,7 @@ class DB8583:
 
         if self._conn and self._cur:
             cur_result = self._cur.execute(
-                self._FILE_EXISTS_SQL, (reference_date, cycle)
+                self._FILE_EXISTS_SQL, (reference_date, file_cycle)
             )
             if cur_result.fetchone():
                 self._logging(data={"file_name": file_name}, model="select")
@@ -252,7 +252,7 @@ class DB8583:
     def _insert_file_db(
         self,
         file_name: str,
-        cycle: str,
+        file_cycle: str,
         reference_date: str,
         parse: List[List[TypeIpmDb]],
     ) -> None:
@@ -266,7 +266,7 @@ class DB8583:
             try:
                 self._cur.executemany(
                     query=DB8583._INSERT_SQL,
-                    params_seq=[(file_name, cycle, reference_date)],
+                    params_seq=[(file_name, file_cycle, reference_date)],
                     returning=True,
                 )
 
@@ -296,17 +296,17 @@ class DB8583:
     def _transaction_db(
         self,
         file_name: str,
-        cycle: str,
+        file_cycle: str,
         reference_date: str,
         parse: List[List[TypeIpmDb]],
     ) -> None:
 
         if not self._exists_file_master(
-            file_name=file_name, cycle=cycle, reference_date=reference_date
+            file_name=file_name, file_cycle=file_cycle, reference_date=reference_date
         ):
             self._insert_file_db(
                 file_name=file_name,
-                cycle=cycle,
+                file_cycle=file_cycle,
                 reference_date=reference_date,
                 parse=parse,
             )

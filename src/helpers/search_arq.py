@@ -19,13 +19,13 @@ _FLAG_DIR: Final[str] = "(1)"
 class DateInvalidFormat(ValueError): ...
 
 
-def file_search(file_date: str, cycle: TypeCycleIpm) -> Optional[TupleFileManager]:
+def file_search(file_date: str, file_cycle: TypeCycleIpm) -> Optional[TupleFileManager]:
 
     _validate_date(date=file_date)
 
     file_date_format: str = datetime.strptime(file_date, "%d/%m/%Y").strftime("%d%m%Y")
     files: Iterator[Path] = _BASE_DIR.rglob(
-        f"CSU_ACQ_MASTER_OUTGOING_{cycle}_{file_date_format}*.TXT"
+        f"CSU_ACQ_MASTER_OUTGOING_{file_cycle}_{file_date_format}*.TXT"
     )
 
     file: Generator[TupleFileManager] = (

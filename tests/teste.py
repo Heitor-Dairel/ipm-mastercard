@@ -4,7 +4,7 @@ from src.core import MC8583
 
 master = MC8583()
 
-master.search_ipm(file_date="26/05/2025", cycle="CIC2")
+master.search_ipm(file_date="26/05/2025", file_cycle="CIC2")
 
 
 def fun_to_teste():

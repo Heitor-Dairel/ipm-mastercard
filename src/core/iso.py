@@ -40,7 +40,7 @@ class MC8583(DataLogging):
         self._file_info: Optional[TupleFileManager] = None
         self._len_raw: int = 0
         self._file_date: Optional[str] = None
-        self._cycle: Optional[str] = None
+        self._file_cycle: Optional[str] = None
 
         self._img: BaseImage = from_file(filepath=self._PATH)
         self._img.set_size(width=34, height=10)
@@ -52,11 +52,11 @@ class MC8583(DataLogging):
 
         return None
 
-    def search_ipm(self, file_date: str, cycle: TypeCycleIpm) -> None:
+    def search_ipm(self, file_date: str, file_cycle: TypeCycleIpm) -> None:
 
-        self._file_date, self._cycle = file_date, cycle
+        self._file_date, self._file_cycle = file_date, file_cycle
         self._file_infos: Optional[TupleFileManager] = file_search(
-            file_date=file_date, cycle=cycle
+            file_date=file_date, file_cycle=file_cycle
         )
 
         return None
@@ -173,7 +173,7 @@ class MC8583(DataLogging):
         rows: List[str] = [
             f" ◉ 📄 File Name  {CompMC8583.SIDE} {file_name}",
             f" ◉ 📄 File Date  {CompMC8583.SIDE} {format_date(file_name=file_name)}",
-            f" ◉ 📄 File Cycle {CompMC8583.SIDE} {self._cycle}",
+            f" ◉ 📄 File Cycle {CompMC8583.SIDE} {self._file_cycle}",
             f" ◉ 📄 File Size  {CompMC8583.SIDE} {format_size(self._len_raw)}",
             f" ◉ 📄 File Row   {CompMC8583.SIDE} {row_count_format}",
         ]
