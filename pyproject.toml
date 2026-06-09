@@ -1,5 +1,5 @@
 [project]
-name = "ipm-mastercard"
+name = "ISO8583-Parser-py"
 version = "0.1.0"
 description = "Parser do Outgoing ISO8583-1993"
 authors = [
